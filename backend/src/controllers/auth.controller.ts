@@ -4,13 +4,13 @@ import { User } from "../models/User.model";
 import { env } from "../config/env";
 
 function signAccessToken(userId: string): string {
-  return jwt.sign({ userId }, env.JWT_SECRET, {
+  return jwt.sign({ userId }, process.env.JWT_SECRET as string, {
     expiresIn: env.JWT_EXPIRES_IN,
   } as jwt.SignOptions);
 }
 
 function signRefreshToken(userId: string): string {
-  return jwt.sign({ userId }, env.JWT_REFRESH_SECRET, {
+  return jwt.sign({ userId }, process.env.JWT_REFRESH_SECRET as string, {
     expiresIn: env.JWT_REFRESH_EXPIRES_IN,
   } as jwt.SignOptions);
 }
@@ -96,6 +96,35 @@ export async function getMe(
       return;
     }
     res.json({ success: true, data: { user } });
+  } catch (error) {
+    next(error);
+  }
+}
+
+// POST /api/auth/refresh-token
+export async function refreshToken(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const { token } = req.body as { token: string };
+    if (!token) {
+      res.status(400).json({ success: false, message: "Refresh token required." });
+      return;
+    }
+    const decoded = jwt.verify(token, env.JWT_REFRESH_SECRET) as JwtPayload;
+    const user = await User.findById(decoded.userId);
+    if (!user) {
+      res.status(401).json({ success: false, message: "Invalid token." });
+      return;
+    }
+    const accessToken = signAccessToken(String(user._id));
+    const refreshToken = signRefreshToken(String(user._id));
+    res.json({
+      success: true,
+      data: { accessToken, refreshToken },
+    });
   } catch (error) {
     next(error);
   }

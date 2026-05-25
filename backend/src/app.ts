@@ -2,8 +2,11 @@ import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
-import { env } from "./config/env";
 import apiRoutes from "./routes";
+import reviewRoutes from "./routes/review.routes";
+import authRoutes from "./routes/auth.routes";
+import { env } from "./config/env";
+app.use("/api/auth", authRoutes);
 import { errorHandler } from "./middleware/error.middleware";
 
 const app = express();

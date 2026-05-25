@@ -33,7 +33,7 @@ const steps = [
   {
     number: "03",
     icon: Sparkles,
-    title: "AI Generates Your Draft",
+    title: "AI Generates Content",
     description:
       "In seconds, WriteFlow AI produces a full, structured draft complete with headings, body copy, and a call to action. It's not filler — it's content that reads like a human wrote it.",
     color: "text-emerald-500",
@@ -66,7 +66,7 @@ function StepCard({
   const Icon = step.icon;
 
   return (
-    <div className="relative flex flex-col items-center text-center sm:items-start sm:text-left">
+    <div className="relative flex flex-col items-center text-center sm:items-start sm:text-left bg-card/80 backdrop-blur-sm border border-border rounded-2xl p-6 shadow-lg">
       {/* Connector line between steps — hidden on last */}
       {!isLast && (
         <motion.div

@@ -1,41 +1,26 @@
-import { Schema, model, Document } from "mongoose";
+import { Schema, model, Document, Types } from "mongoose";
 import bcrypt from "bcryptjs";
 
 export interface IUser extends Document {
   name: string;
   email: string;
   password: string;
-  avatarUrl?: string;
-  createdAt: Date;
-  updatedAt: Date;
+  avatar?: string;
+  bio?: string;
+  role: "USER" | "ADMIN";
+  plan: "free" | "pro" | "team";
   comparePassword(candidate: string): Promise<boolean>;
 }
 
 const userSchema = new Schema<IUser>(
   {
-    name: {
-      type: String,
-      required: [true, "Name is required"],
-      trim: true,
-      maxlength: [100, "Name cannot exceed 100 characters"],
-    },
-    email: {
-      type: String,
-      required: [true, "Email is required"],
-      unique: true,
-      lowercase: true,
-      trim: true,
-      match: [/^\S+@\S+\.\S+$/, "Please provide a valid email"],
-    },
-    password: {
-      type: String,
-      required: [true, "Password is required"],
-      minlength: [8, "Password must be at least 8 characters"],
-      select: false, // never returned in queries by default
-    },
-    avatarUrl: {
-      type: String,
-    },
+    name: { type: String, required: true, trim: true, maxlength: 100 },
+    email: { type: String, required: true, unique: true, lowercase: true, trim: true, match: [/^\S+@\S+\.\S+$/, "Please provide a valid email"] },
+    password: { type: String, required: true, minlength: 8, select: false },
+    avatar: { type: String },
+    bio: { type: String },
+    role: { type: String, enum: ["USER", "ADMIN"], default: "USER" },
+    plan: { type: String, enum: ["free", "pro", "team"], default: "free" },
   },
   { timestamps: true }
 );
@@ -43,15 +28,13 @@ const userSchema = new Schema<IUser>(
 // Hash password before saving
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
-  const salt = await bcrypt.genSalt(12);
+  const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
   next();
 });
 
-// Instance method to compare passwords
-userSchema.methods.comparePassword = async function (
-  candidate: string
-): Promise<boolean> {
+// Method to compare password
+userSchema.methods.comparePassword = async function (candidate: string) {
   return bcrypt.compare(candidate, this.password);
 };
 

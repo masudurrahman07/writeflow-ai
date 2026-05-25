@@ -47,42 +47,6 @@ const testimonials = [
       "The SEO optimization built into WriteFlow AI is genuinely useful — not just keyword stuffing, but real structural guidance. Our organic traffic increased 40% in two months after switching our content workflow to WriteFlow.",
     highlight: "organic traffic increased 40% in two months",
   },
-  {
-    id: 4,
-    name: "Tom Eriksson",
-    role: "Head of Growth",
-    company: "Northstar SaaS",
-    avatar: "",
-    initials: "TE",
-    rating: 5,
-    review:
-      "Team collaboration is seamless. Our writers, editors, and designers all work inside WriteFlow AI now. No more Google Docs chaos, no more version conflicts. It's become the single source of truth for all our content.",
-    highlight: "single source of truth for all our content",
-  },
-  {
-    id: 5,
-    name: "Amara Osei",
-    role: "Freelance Copywriter",
-    company: "Self-employed",
-    avatar: "",
-    initials: "AO",
-    rating: 5,
-    review:
-      "As a freelancer, speed is money. WriteFlow AI lets me take on twice as many clients without sacrificing quality. The templates are a game-changer — I can go from brief to first draft in under 10 minutes.",
-    highlight: "go from brief to first draft in under 10 minutes",
-  },
-  {
-    id: 6,
-    name: "Daniel Park",
-    role: "E-commerce Director",
-    company: "Bloom & Co.",
-    avatar: "",
-    initials: "DP",
-    rating: 5,
-    review:
-      "We have 2,000+ product SKUs and writing descriptions was a nightmare. WriteFlow AI's bulk generation feature let us rewrite our entire catalog in a week. Conversion rates on updated pages are up 22%.",
-    highlight: "conversion rates on updated pages are up 22%",
-  },
 ] as const;
 
 // ─── Star Rating ──────────────────────────────────────────────────────────────
@@ -125,7 +89,7 @@ function TestimonialCard({
       transition={{ duration: 0.5, delay: index * 0.07, ease: [0.22, 1, 0.36, 1] }}
       className={cn(
         "flex flex-col gap-5 rounded-2xl border border-border bg-card p-6 shadow-sm",
-        "hover:border-primary/20 hover:shadow-md transition-all duration-300"
+        "hover:border-primary/20 hover:shadow-md hover:scale-[1.01] transition-all duration-300"
       )}
     >
       {/* Quote icon + stars */}
@@ -197,8 +161,8 @@ export function TestimonialsSection() {
           />
         </motion.div>
 
-        {/* Masonry-style grid — 1 col → 2 col → 3 col */}
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        {/* Row grid — 1 col → 3 col on md */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
           {testimonials.map((t, i) => (
             <TestimonialCard key={t.id} testimonial={t} index={i} />
           ))}

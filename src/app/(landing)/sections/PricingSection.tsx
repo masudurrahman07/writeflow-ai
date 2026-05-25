@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, Fragment } from "react";
 import { motion, useInView } from "framer-motion";
 import { Check, X, Zap } from "lucide-react";
 import Link from "next/link";
@@ -19,27 +19,23 @@ const plans = [
     name: "Free",
     price: "$0",
     period: "forever",
-    description: "Perfect for individuals exploring AI writing for the first time.",
+    description: "Explore the power of AI writing with no upfront commitment.",
     cta: "Get Started Free",
     ctaHref: "/register",
     highlighted: false,
     features: [
-      { label: "5,000 words per month", included: true },
-      { label: "10 template types", included: true },
-      { label: "Basic tone rewriting", included: true },
-      { label: "1 workspace", included: true },
-      { label: "Export to Markdown", included: true },
-      { label: "SEO optimization", included: false },
-      { label: "Team collaboration", included: false },
-      { label: "Priority AI generation", included: false },
-      { label: "API access", included: false },
-      { label: "Custom brand voice", included: false },
+      { label: "5 documents per month", included: true },
+      { label: "1 standard AI agent", included: true },
+      { label: "Community support", included: true },
+      { label: "Team workspace", included: false },
+      { label: "Admin dashboard", included: false },
+      { label: "Advanced analytics", included: false },
     ],
   },
   {
     id: "pro",
     name: "Pro",
-    price: "$19",
+    price: "$12",
     period: "per month",
     description: "For content creators and marketers who publish consistently.",
     cta: "Start Pro Trial",
@@ -47,62 +43,92 @@ const plans = [
     highlighted: true,
     badge: "Most Popular",
     features: [
-      { label: "100,000 words per month", included: true },
-      { label: "50+ template types", included: true },
-      { label: "Advanced tone rewriting", included: true },
-      { label: "3 workspaces", included: true },
-      { label: "Export to Markdown, HTML, DOCX", included: true },
-      { label: "SEO optimization", included: true },
-      { label: "Team collaboration (up to 3)", included: true },
-      { label: "Priority AI generation", included: true },
-      { label: "API access", included: false },
-      { label: "Custom brand voice", included: false },
+      { label: "Unlimited documents", included: true },
+      { label: "All premium AI agents", included: true },
+      { label: "Priority support", included: true },
+      { label: "Team workspace", included: false },
+      { label: "Admin dashboard", included: false },
+      { label: "Advanced analytics", included: false },
     ],
   },
   {
     id: "team",
     name: "Team",
-    price: "$49",
+    price: "$39",
     period: "per month",
     description: "For agencies and content teams that need scale and control.",
     cta: "Start Team Trial",
     ctaHref: "/register?plan=team",
     highlighted: false,
     features: [
-      { label: "Unlimited words", included: true },
-      { label: "50+ template types", included: true },
-      { label: "Advanced tone rewriting", included: true },
-      { label: "Unlimited workspaces", included: true },
-      { label: "Export to all formats + CMS", included: true },
-      { label: "SEO optimization", included: true },
-      { label: "Team collaboration (unlimited)", included: true },
-      { label: "Priority AI generation", included: true },
-      { label: "API access", included: true },
-      { label: "Custom brand voice", included: true },
+      { label: "Unlimited documents", included: true },
+      { label: "All premium AI agents", included: true },
+      { label: "Priority support", included: true },
+      { label: "Team workspace & collaboration", included: true },
+      { label: "Admin dashboard controls", included: true },
+      { label: "Workspace & usage analytics", included: true },
     ],
   },
 ] as const;
+
+const comparisonFeatures = [
+  {
+    category: "Core Features & Writing",
+    items: [
+      { name: "Monthly Documents", free: "5 documents", pro: "Unlimited", team: "Unlimited" },
+      { name: "AI Writing Agents", free: "1 standard agent", pro: "All premium agents", team: "All premium agents" },
+      { name: "Tone & Style Rewrite", free: "Basic (3 tones)", pro: "Advanced (12+ tones)", team: "Advanced (12+ tones)" },
+      { name: "SEO Analyzer & Optimizer", free: false, pro: true, team: true },
+    ],
+  },
+  {
+    category: "Workspace & Team",
+    items: [
+      { name: "Team Workspaces", free: false, pro: false, team: "Unlimited" },
+      { name: "Collaborative Editing", free: false, pro: false, team: "Live Presence" },
+      { name: "Admin Control Dashboard", free: false, pro: false, team: true },
+      { name: "Workspace Analytics & Reports", free: false, pro: false, team: true },
+    ],
+  },
+  {
+    category: "Platform & Support",
+    items: [
+      { name: "Support Level", free: "Community", pro: "Priority Support", team: "24/7 Dedicated Support" },
+      { name: "Custom Brand Voices", free: false, pro: false, team: true },
+      { name: "Export Formats", free: "Markdown, TXT", pro: "PDF, DOCX, Markdown, TXT", team: "All formats + Direct CMS Publish" },
+      { name: "REST API Access", free: false, pro: false, team: "Full API Access" },
+    ],
+  },
+];
 
 // ─── Feature Row ──────────────────────────────────────────────────────────────
 
 function FeatureRow({
   label,
   included,
+  highlighted,
 }: {
   label: string;
   included: boolean;
+  highlighted: boolean;
 }) {
   return (
     <li className="flex items-start gap-3 py-1.5">
       {included ? (
-        <Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" />
+        <Check className={cn("mt-0.5 h-4 w-4 shrink-0", highlighted ? "text-primary-foreground" : "text-emerald-500")} />
       ) : (
-        <X className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground/40" />
+        <X className={cn("mt-0.5 h-4 w-4 shrink-0", highlighted ? "text-primary-foreground/30" : "text-muted-foreground/40")} />
       )}
       <span
         className={cn(
           "text-sm leading-snug",
-          included ? "text-foreground" : "text-muted-foreground/60"
+          included
+            ? highlighted
+              ? "text-primary-foreground"
+              : "text-foreground"
+            : highlighted
+            ? "text-primary-foreground/50"
+            : "text-muted-foreground/60"
         )}
       >
         {label}
@@ -127,10 +153,10 @@ function PlanCard({
       viewport={{ once: true, margin: "-60px" }}
       transition={{ duration: 0.5, delay: index * 0.1, ease: [0.22, 1, 0.36, 1] }}
       className={cn(
-        "relative flex flex-col rounded-2xl border p-7 shadow-sm",
+        "relative flex flex-col rounded-2xl border p-7 shadow-sm transition-all duration-300",
         plan.highlighted
-          ? "border-primary bg-primary text-primary-foreground shadow-lg scale-[1.02]"
-          : "border-border bg-card"
+          ? "border-primary bg-primary text-primary-foreground shadow-lg scale-[1.02] hover:scale-[1.04]"
+          : "border-border bg-card hover:border-primary/20 hover:shadow-md"
       )}
     >
       {/* Popular badge */}
@@ -175,7 +201,7 @@ function PlanCard({
         </div>
         <p
           className={cn(
-            "text-sm leading-relaxed",
+            "text-sm leading-relaxed min-h-[40px]",
             plan.highlighted
               ? "text-primary-foreground/80"
               : "text-muted-foreground"
@@ -189,7 +215,7 @@ function PlanCard({
       <Button
         asChild
         variant={plan.highlighted ? "secondary" : "default"}
-        className="w-full font-semibold"
+        className="w-full font-semibold h-11"
       >
         <Link href={plan.ctaHref}>{plan.cta}</Link>
       </Button>
@@ -202,9 +228,14 @@ function PlanCard({
       />
 
       {/* Feature list */}
-      <ul className="flex-1 space-y-0.5">
+      <ul className="flex-1 space-y-0.5 mb-2">
         {plan.features.map((f) => (
-          <FeatureRow key={f.label} label={f.label} included={f.included} />
+          <FeatureRow
+            key={f.label}
+            label={f.label}
+            included={f.included}
+            highlighted={plan.highlighted}
+          />
         ))}
       </ul>
     </motion.div>
@@ -245,6 +276,72 @@ export function PricingSection() {
             <PlanCard key={plan.id} plan={plan} index={i} />
           ))}
         </div>
+
+        {/* Feature Comparison Table */}
+        <motion.div
+          initial={{ opacity: 0, y: 32 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="mt-20 hidden md:block"
+        >
+          <div className="text-center mb-10">
+            <h3 className="text-xl font-bold text-foreground">Compare all plans side-by-side</h3>
+            <p className="text-sm text-muted-foreground mt-1">Detailed feature breakdown to help you make the right choice.</p>
+          </div>
+
+          <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse text-left">
+                <thead>
+                  <tr className="border-b border-border bg-muted/40">
+                    <th className="p-4 text-xs font-bold uppercase tracking-wider text-muted-foreground px-6">Features</th>
+                    <th className="p-4 text-xs font-bold uppercase tracking-wider text-muted-foreground w-1/5 text-center">Free</th>
+                    <th className="p-4 text-xs font-bold uppercase tracking-wider text-muted-foreground w-1/5 text-center bg-primary/5 text-primary">Pro</th>
+                    <th className="p-4 text-xs font-bold uppercase tracking-wider text-muted-foreground w-1/5 text-center">Team</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border/60">
+                  {comparisonFeatures.map((section) => (
+                    <Fragment key={section.category}>
+                      <tr className="bg-muted/10 border-t border-border">
+                        <td colSpan={4} className="p-3 text-xs font-bold text-foreground/80 tracking-wide uppercase px-6">
+                          {section.category}
+                        </td>
+                      </tr>
+                      {section.items.map((item) => (
+                        <tr key={item.name} className="hover:bg-muted/5 transition-colors">
+                          <td className="p-4 text-sm font-medium text-foreground px-6">{item.name}</td>
+                          <td className="p-4 text-sm text-muted-foreground text-center">
+                            {typeof item.free === "boolean" ? (
+                              item.free ? <Check className="mx-auto h-4 w-4 text-emerald-500" /> : <X className="mx-auto h-4 w-4 text-muted-foreground/30" />
+                            ) : (
+                              item.free
+                            )}
+                          </td>
+                          <td className="p-4 text-sm text-foreground text-center bg-primary/[0.02] border-x border-primary/10">
+                            {typeof item.pro === "boolean" ? (
+                              item.pro ? <Check className="mx-auto h-4 w-4 text-primary" /> : <X className="mx-auto h-4 w-4 text-muted-foreground/30" />
+                            ) : (
+                              item.pro
+                            )}
+                          </td>
+                          <td className="p-4 text-sm text-muted-foreground text-center">
+                            {typeof item.team === "boolean" ? (
+                              item.team ? <Check className="mx-auto h-4 w-4 text-emerald-500" /> : <X className="mx-auto h-4 w-4 text-muted-foreground/30" />
+                            ) : (
+                              item.team
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </Fragment>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </motion.div>
 
         {/* Footer note */}
         <motion.p

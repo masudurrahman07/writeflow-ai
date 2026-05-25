@@ -17,57 +17,33 @@ import Link from "next/link";
 const faqs = [
   {
     id: "faq-1",
-    question: "How is WriteFlow AI different from ChatGPT or other AI tools?",
+    question: "What pricing plans do you offer, and is there a free tier?",
     answer:
-      "WriteFlow AI is purpose-built for content creation workflows — not general-purpose chat. It combines AI generation with structured templates, SEO scoring, tone controls, and team collaboration in a single workspace. You don't need to engineer prompts; the platform handles context, structure, and formatting automatically so your output is publish-ready, not just a raw text dump.",
+      "Yes! We offer a Free plan that includes 5 documents per month, 1 standard AI agent, and community support. For creators and professionals, our Pro plan is $12/month and includes unlimited documents, all premium AI agents, and priority support. For teams and agencies, our Team plan is $39/month and includes everything in Pro plus team workspaces, admin dashboards, and usage analytics.",
   },
   {
     id: "faq-2",
-    question: "Will the content pass AI detection tools?",
+    question: "How does WriteFlow AI ensure high-quality and natural-sounding output?",
     answer:
-      "WriteFlow AI generates content that reads naturally and is designed to be edited and refined by humans before publishing. We recommend treating AI output as a high-quality first draft — review it, add your expertise, and personalize it. This workflow produces content that reflects genuine human insight while dramatically reducing the time spent on initial drafting.",
+      "WriteFlow AI utilizes custom, state-of-the-art language models and prompt-engineered templates built specifically for professional content generation. Instead of general-purpose chat tools that produce repetitive or robotic copy, our system structures articles, emails, and ads using industry-proven content frameworks. You can customize your brand voice, adjust tone parameters, and use advanced tone rewriting tools to ensure the output reads exactly like it was written by an expert copywriter.",
   },
   {
     id: "faq-3",
-    question: "What happens when I hit my monthly word limit?",
+    question: "Is my data and generated content secure and private?",
     answer:
-      "On the Free plan, generation pauses until your limit resets at the start of the next billing cycle. You can upgrade to Pro or Team at any time to immediately unlock more capacity. We'll send you an email notification when you reach 80% of your limit so you're never caught off guard.",
+      "Absolutely. We prioritize your privacy and data security above all else. All documents are fully encrypted at rest and in transit. Most importantly, we never use your data or generated content to train our AI models, and we never share your copy with third parties. Your IP and intellectual property remain 100% yours.",
   },
   {
     id: "faq-4",
-    question: "Can I use WriteFlow AI for multiple clients or brands?",
+    question: "How do team workspaces and collaboration features work?",
     answer:
-      "Yes. The Pro plan includes 3 separate workspaces, and the Team plan offers unlimited workspaces. Each workspace has its own brand voice settings, template library, and document history — making it easy to keep client work completely separate and maintain consistent tone across each brand.",
+      "On our Team plan, you can invite team members via email and assign them specific roles (Admin, Editor, or Viewer). Multiple teammates can collaborate on the same document simultaneously with live cursor presence and real-time edits. You can create shared template libraries, set consistent workspace-wide brand voices, and manage all billing and access from a centralized admin control dashboard.",
   },
   {
     id: "faq-5",
-    question: "Does WriteFlow AI support languages other than English?",
+    question: "Can I cancel my subscription at any time, and is there a refund policy?",
     answer:
-      "WriteFlow AI currently generates high-quality content in English, Spanish, French, German, Portuguese, and Dutch. We're actively expanding language support — check our roadmap for upcoming additions. The tone rewriting and SEO features are fully available in all supported languages.",
-  },
-  {
-    id: "faq-6",
-    question: "How does team collaboration work?",
-    answer:
-      "Invite teammates via email and assign them roles: Admin, Editor, or Viewer. Multiple team members can work on the same document simultaneously with live cursor presence. You can leave inline comments, suggest edits, and track the full revision history. The Team plan also includes an approval workflow so content goes through review before publishing.",
-  },
-  {
-    id: "faq-7",
-    question: "Can I export content to my CMS or website?",
-    answer:
-      "All plans support export to Markdown and plain text. The Pro plan adds HTML and DOCX export. The Team plan includes direct integrations with WordPress, Webflow, Contentful, and Notion, plus a REST API for custom CMS connections. One-click publishing means you never have to copy-paste again.",
-  },
-  {
-    id: "faq-8",
-    question: "Is my content private and secure?",
-    answer:
-      "Absolutely. Your documents are encrypted at rest and in transit. We do not use your content to train our AI models, and we never share your data with third parties. Enterprise customers can request a Data Processing Agreement (DPA) and SOC 2 compliance documentation.",
-  },
-  {
-    id: "faq-9",
-    question: "What is the refund policy?",
-    answer:
-      "We offer a 14-day free trial on all paid plans — no credit card required. If you upgrade and decide WriteFlow AI isn't right for you within the first 30 days of a paid subscription, contact our support team for a full refund. No questions asked.",
+      "Yes, you can cancel your subscription at any time with a single click from your account dashboard — no questions asked. There are no long-term contracts or cancellation fees. If you cancel, your paid benefits will remain active until the end of your billing cycle. We also offer a 14-day free trial on our paid plans and a 30-day refund window for any paid subscriptions if you are not fully satisfied.",
   },
 ] as const;
 

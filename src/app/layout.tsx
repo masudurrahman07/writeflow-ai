@@ -4,6 +4,7 @@ import "./globals.css";
 import { ThemeProvider, Navbar, Footer } from "@/components/shared";
 import { siteConfig } from "@/config/site";
 import { cn } from "@/lib/utils";
+import { Toaster } from "sonner";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -35,6 +36,7 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
+            <Toaster />
           <div className="relative flex min-h-screen flex-col">
             {/*
              * Pass `user` prop from your auth session here.
