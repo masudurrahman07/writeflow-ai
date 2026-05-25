@@ -80,36 +80,6 @@ function useTypingEffect(
 }
 
 // ───────────────────────────────────────────────────────────────────────────────
-// Floating Stats
-// ───────────────────────────────────────────────────────────────────────────────
-
-function FloatingPill({
-  className,
-  children,
-  delay = 0,
-}: {
-  className?: string;
-  children: React.ReactNode;
-  delay?: number;
-}) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay, duration: 0.6 }}
-      className={cn(
-        "absolute hidden lg:flex items-center gap-2 rounded-full",
-        "border border-slate-200 bg-slate-100/80 backdrop-blur-md",
-        "px-4 py-2 text-sm text-slate-800 shadow-sm",
-        className
-      )}
-    >
-      {children}
-    </motion.div>
-  );
-}
-
-// ───────────────────────────────────────────────────────────────────────────────
 // Editor Preview
 // ───────────────────────────────────────────────────────────────────────────────
 

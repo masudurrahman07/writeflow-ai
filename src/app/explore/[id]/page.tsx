@@ -4,7 +4,6 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 interface Template {
@@ -231,7 +230,7 @@ export default function TemplateDetails({ params }: { params: { id: string } }) 
               <label className="mr-2">Rating:</label>
               <select
                 value={newRating}
-                onChange={(e) => setNewRating(Number(e.target.value))
+                onChange={(e) => setNewRating(Number(e.target.value))}
                 className="p-1 border rounded"
               >
                 {[5, 4, 3, 2, 1].map((v) => (

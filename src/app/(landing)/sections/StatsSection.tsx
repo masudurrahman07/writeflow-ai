@@ -96,7 +96,7 @@ function StatCard({
   animate: boolean;
 }) {
   const Icon = stat.icon;
-  const isDecimal = "isDecimal" in stat && stat.isDecimal;
+  const isDecimal = "isDecimal" in stat && Boolean(stat.isDecimal);
   const count = useCounter(stat.value, 2000, animate, isDecimal);
 
   const displayValue = isDecimal

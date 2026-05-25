@@ -39,27 +39,40 @@ export default function LoginPage() {
   const onSubmit = async (data: LoginForm) => {
     setLoading(true);
     try {
-      const res = await signIn("credentials", {
-        ...data,
-        redirect: false,
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000";
+      const res = await fetch(`${apiUrl}/api/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
       });
-      if (res?.ok) {
+      const json = await res.json();
+      if (res.ok && json.success && json.data?.accessToken) {
+        const { setAuthToken, setAuthUser } = await import("@/lib/auth");
+        setAuthToken(json.data.accessToken);
+        if (json.data.user) {
+          setAuthUser({
+            id: String(json.data.user.id),
+            name: json.data.user.name,
+            email: json.data.user.email,
+            role: json.data.user.role ?? "USER",
+          });
+        }
         toast.success("Logged in successfully!");
         router.push("/dashboard");
       } else {
-        toast.error(res?.error || "Invalid credentials");
+        toast.error(json.message || "Invalid credentials");
       }
-    } catch (e) {
+    } catch {
       toast.error("Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
-  const demoLogin = (email: string, password: string) => {
+  const demoLogin = async (email: string, password: string) => {
     setValue("email", email);
     setValue("password", password);
-    handleSubmit(onSubmit)();
+    await handleSubmit(onSubmit)();
   };
 
   const handleGoogle = async () => {
@@ -105,7 +118,7 @@ export default function LoginPage() {
             Continue with Google
           </Button>
           <p className="text-center text-sm text-muted-foreground">
-            Don't have an account?{' '}
+            Don&apos;t have an account?{' '}
             <Link href="/register" className="font-medium text-primary hover:underline">Register</Link>
           </p>
           <p className="text-center text-sm text-muted-foreground">

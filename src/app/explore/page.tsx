@@ -82,7 +82,6 @@ export default function ExplorePage() {
 
   // ----- Helpers -----
   const totalPages = Math.ceil(total / limit);
-  const ratingOptions = ["All", "4", "3"]; // "4" => 4+ stars, "3" => 3+ stars
   const sortOptions: Record<string, string> = {
     popular: "Most Popular",
     newest: "Newest",

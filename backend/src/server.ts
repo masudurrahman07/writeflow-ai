@@ -1,6 +1,6 @@
 import "dotenv/config";
 import app from "./app";
-import { connectDB } from "./config/db";
+import connectDB from "./config/db";
 import { env } from "./config/env";
 
 async function bootstrap(): Promise<void> {

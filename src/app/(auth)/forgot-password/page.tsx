@@ -24,13 +24,13 @@ export default function ForgotPasswordPage() {
 
   const [loading, setLoading] = useState(false);
 
-  const onSubmit = async (data: FormData) => {
+  const onSubmit = async () => {
     setLoading(true);
     try {
       // Simulate API call – replace with real request later
       await new Promise((res) => setTimeout(res, 1500));
       toast.success("If an account exists, a reset link has been sent to your email.");
-    } catch (err) {
+    } catch {
       toast.error("Something went wrong. Please try again.");
     } finally {
       setLoading(false);

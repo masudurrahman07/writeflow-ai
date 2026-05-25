@@ -72,6 +72,8 @@ export const getTemplateById = async (req: Request, res: Response) => {
     console.error(err);
     res.status(500).json({ success: false, message: 'Server error' });
   }
+};
+
 export const getRelatedTemplates = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
@@ -89,7 +91,3 @@ export const getRelatedTemplates = async (req: Request, res: Response) => {
   }
 };
 
-// Export additional controller
-export { getRelatedTemplates };
-
-// Existing exports remain unchanged

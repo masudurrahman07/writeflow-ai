@@ -3,6 +3,10 @@ import jwt from "jsonwebtoken";
 import { User } from "../models/User.model";
 import { env } from "../config/env";
 
+interface JwtPayload {
+  userId: string;
+}
+
 function signAccessToken(userId: string): string {
   return jwt.sign({ userId }, process.env.JWT_SECRET as string, {
     expiresIn: env.JWT_EXPIRES_IN,
@@ -42,7 +46,12 @@ export async function register(
     res.status(201).json({
       success: true,
       data: {
-        user: { id: user._id, name: user.name, email: user.email },
+        user: {
+          id: user._id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+        },
         accessToken,
         refreshToken,
       },
@@ -73,7 +82,12 @@ export async function login(
     res.json({
       success: true,
       data: {
-        user: { id: user._id, name: user.name, email: user.email },
+        user: {
+          id: user._id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+        },
         accessToken,
         refreshToken,
       },
@@ -95,7 +109,19 @@ export async function getMe(
       res.status(404).json({ success: false, message: "User not found." });
       return;
     }
-    res.json({ success: true, data: { user } });
+    res.json({
+      success: true,
+      data: {
+        user: {
+          id: user._id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+          avatar: user.avatar,
+          plan: user.plan,
+        },
+      },
+    });
   } catch (error) {
     next(error);
   }

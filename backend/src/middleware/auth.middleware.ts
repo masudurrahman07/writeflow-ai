@@ -38,6 +38,9 @@ export function protect(
   }
 }
 
+/** Alias used by AI and other protected routes */
+export const verifyToken = protect;
+
 /**
  * requireAdmin – ensures the authenticated user has ADMIN role.
  */

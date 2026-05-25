@@ -38,14 +38,14 @@ export default function RegisterPage() {
     mode: "onTouched",
   });
 
-  async function onSubmit(data: RegisterForm) {
+  async function onSubmit() {
     setLoading(true);
     try {
       // TODO: replace with real registration API call
       await new Promise((res) => setTimeout(res, 1500));
       toast.success("Account created successfully!");
       router.push("/dashboard");
-    } catch (e) {
+    } catch {
       toast.error("Registration failed. Please try again.");
     } finally {
       setLoading(false);
