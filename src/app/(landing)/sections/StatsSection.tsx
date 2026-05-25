@@ -1,0 +1,190 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+import { motion, useInView, useReducedMotion } from "framer-motion";
+import { Users, FileText, Globe, Star } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Container } from "@/components/shared/Container";
+
+// ─── Data ─────────────────────────────────────────────────────────────────────
+
+const stats = [
+  {
+    icon: Users,
+    value: 10000,
+    suffix: "+",
+    label: "Active Writers",
+    description: "Creators, marketers, and teams publishing with WriteFlow AI every day.",
+    color: "text-violet-500",
+    bg: "bg-violet-500/10 dark:bg-violet-500/15",
+  },
+  {
+    icon: FileText,
+    value: 500000,
+    suffix: "+",
+    label: "Words Generated",
+    description: "High-quality words produced by our AI engine — and counting.",
+    color: "text-blue-500",
+    bg: "bg-blue-500/10 dark:bg-blue-500/15",
+  },
+  {
+    icon: Globe,
+    value: 50,
+    suffix: "+",
+    label: "Content Templates",
+    description: "Ready-to-use templates covering every content format and industry.",
+    color: "text-emerald-500",
+    bg: "bg-emerald-500/10 dark:bg-emerald-500/15",
+  },
+  {
+    icon: Star,
+    value: 4.9,
+    suffix: "/5",
+    label: "Average Rating",
+    description: "Rated by verified users across G2, Product Hunt, and Capterra.",
+    color: "text-amber-500",
+    bg: "bg-amber-500/10 dark:bg-amber-500/15",
+    isDecimal: true,
+  },
+] as const;
+
+// ─── Animated Counter ─────────────────────────────────────────────────────────
+
+function useCounter(
+  target: number,
+  duration: number,
+  start: boolean,
+  isDecimal = false
+) {
+  const [count, setCount] = useState(0);
+  const shouldReduce = useReducedMotion();
+
+  useEffect(() => {
+    if (!start) return;
+    if (shouldReduce) {
+      setCount(target);
+      return;
+    }
+
+    const startTime = performance.now();
+    const startVal = 0;
+
+    const tick = (now: number) => {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      // Ease-out cubic
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const current = startVal + (target - startVal) * eased;
+      setCount(isDecimal ? Math.round(current * 10) / 10 : Math.floor(current));
+      if (progress < 1) requestAnimationFrame(tick);
+    };
+
+    requestAnimationFrame(tick);
+  }, [start, target, duration, isDecimal, shouldReduce]);
+
+  return count;
+}
+
+// ─── Stat Card ────────────────────────────────────────────────────────────────
+
+function StatCard({
+  stat,
+  index,
+  animate,
+}: {
+  stat: (typeof stats)[number];
+  index: number;
+  animate: boolean;
+}) {
+  const Icon = stat.icon;
+  const isDecimal = "isDecimal" in stat && stat.isDecimal;
+  const count = useCounter(stat.value, 2000, animate, isDecimal);
+
+  const displayValue = isDecimal
+    ? count.toFixed(1)
+    : count >= 1000
+    ? count >= 100000
+      ? `${Math.floor(count / 1000)}K`
+      : count.toLocaleString()
+    : count.toString();
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 28 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-60px" }}
+      transition={{ duration: 0.5, delay: index * 0.1, ease: [0.22, 1, 0.36, 1] }}
+      className={cn(
+        "flex flex-col items-center text-center gap-4 rounded-2xl border border-border",
+        "bg-card p-8 shadow-sm"
+      )}
+    >
+      {/* Icon */}
+      <div
+        className={cn(
+          "flex h-12 w-12 items-center justify-center rounded-xl",
+          stat.bg
+        )}
+      >
+        <Icon className={cn("h-5 w-5", stat.color)} />
+      </div>
+
+      {/* Counter */}
+      <div>
+        <p className="text-4xl font-extrabold tracking-tight text-foreground tabular-nums">
+          {displayValue}
+          <span className={cn("text-2xl font-bold", stat.color)}>
+            {stat.suffix}
+          </span>
+        </p>
+        <p className="mt-1 text-base font-semibold text-foreground">
+          {stat.label}
+        </p>
+      </div>
+
+      {/* Description */}
+      <p className="text-sm text-muted-foreground leading-relaxed max-w-[200px]">
+        {stat.description}
+      </p>
+    </motion.div>
+  );
+}
+
+// ─── Stats Section ────────────────────────────────────────────────────────────
+
+export function StatsSection() {
+  const ref = useRef<HTMLElement>(null);
+  const inView = useInView(ref, { once: true, margin: "-80px" });
+
+  return (
+    <section
+      id="stats"
+      ref={ref}
+      className="py-20 sm:py-24 lg:py-32 bg-muted/30"
+    >
+      <Container>
+        {/* Headline */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={inView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.5 }}
+          className="mb-12 text-center"
+        >
+          <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+            Trusted by writers worldwide
+          </h2>
+          <p className="mt-3 text-muted-foreground text-base sm:text-lg max-w-xl mx-auto">
+            Real numbers from real users — no inflated metrics, no vanity stats.
+          </p>
+        </motion.div>
+
+        {/* Stats grid — 1 col → 2 col → 4 col */}
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          {stats.map((stat, i) => (
+            <StatCard key={stat.label} stat={stat} index={i} animate={inView} />
+          ))}
+        </div>
+      </Container>
+    </section>
+  );
+}

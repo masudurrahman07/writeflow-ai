@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { ThemeProvider } from "@/components/shared/ThemeProvider";
-import { Navbar } from "@/components/shared/Navbar";
-import { Footer } from "@/components/shared/Footer";
+import { ThemeProvider, Navbar, Footer } from "@/components/shared";
 import { siteConfig } from "@/config/site";
 import { cn } from "@/lib/utils";
 
@@ -38,7 +36,13 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <div className="relative flex min-h-screen flex-col">
-            <Navbar />
+            {/*
+             * Pass `user` prop from your auth session here.
+             * Example with next-auth:
+             *   const session = await getServerSession();
+             *   <Navbar user={session?.user ?? null} />
+             */}
+            <Navbar user={null} />
             <main className="flex-1">{children}</main>
             <Footer />
           </div>
