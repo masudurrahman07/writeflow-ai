@@ -1,36 +1,78 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# WriteFlow AI
+
+AI-powered writing assistant monorepo.
+
+## Stack
+
+| Layer    | Technology                                      |
+| -------- | ----------------------------------------------- |
+| Frontend | Next.js 14 (App Router), TypeScript, Tailwind CSS, shadcn/ui |
+| Backend  | Express.js, TypeScript, MongoDB + Mongoose, JWT |
+
+## Project Structure
+
+```
+writeflow-ai/
+├── src/                        # Next.js frontend (App Router)
+│   ├── app/                    # Pages and layouts
+│   ├── components/
+│   │   ├── ui/                 # shadcn/ui components
+│   │   ├── shared/             # Navbar, Footer, ThemeProvider
+│   │   └── dashboard/          # Dashboard-specific components
+│   ├── lib/                    # Utility functions (cn, etc.)
+│   ├── hooks/                  # Custom React hooks
+│   ├── types/                  # Shared TypeScript types
+│   └── config/                 # Site config, constants
+├── backend/
+│   └── src/
+│       ├── server.ts           # Entry point
+│       ├── app.ts              # Express app setup
+│       ├── routes/             # Route definitions
+│       ├── controllers/        # Request handlers
+│       ├── models/             # Mongoose models
+│       ├── middleware/         # Auth, error, validation
+│       └── config/             # DB connection, env
+├── .env.example                # Frontend env template
+└── backend/.env.example        # Backend env template
+```
 
 ## Getting Started
 
-First, run the development server:
+### 1. Environment variables
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+cp .env.example .env.local
+cp backend/.env.example backend/.env
+# Fill in the values
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Install dependencies
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+# Frontend
+npm install
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+# Backend
+cd backend && npm install
+```
 
-## Learn More
+### 3. Run in development
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+# Frontend (from root)
+npm run dev
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+# Backend (from root)
+npm run backend:dev
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Frontend runs on http://localhost:3000  
+Backend runs on http://localhost:5000
 
-## Deploy on Vercel
+## Adding shadcn/ui components
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+npx shadcn-ui@latest add button
+npx shadcn-ui@latest add card
+# etc.
+```
