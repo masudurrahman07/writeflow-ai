@@ -141,3 +141,131 @@ export async function updateUser(
     next(error);
   }
 }
+
+export async function getUsers(
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const { search = "", page = "1", limit = "10" } = req.query;
+    const pageNum = parseInt(page as string, 10) || 1;
+    const limitNum = parseInt(limit as string, 10) || 10;
+    const skip = (pageNum - 1) * limitNum;
+
+    const query: any = {};
+    if (search) {
+      query.$or = [
+        { name: { $regex: search, $options: "i" } },
+        { email: { $regex: search, $options: "i" } },
+      ];
+    }
+
+    const [users, total] = await Promise.all([
+      User.find(query)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limitNum),
+      User.countDocuments(query),
+    ]);
+
+    res.json({
+      success: true,
+      data: users.map((user) => ({
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        plan: user.plan,
+        banned: user.banned ?? false,
+        createdAt: user.createdAt,
+      })),
+      meta: {
+        page: pageNum,
+        limit: limitNum,
+        total,
+        pages: Math.ceil(total / limitNum),
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function updateUserRole(
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const { userId, role } = req.body;
+
+    if (!userId || !role) {
+      res.status(400).json({ success: false, message: "User ID and role are required." });
+      return;
+    }
+
+    if (role !== "USER" && role !== "ADMIN") {
+      res.status(400).json({ success: false, message: "Invalid role. Must be USER or ADMIN." });
+      return;
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      res.status(404).json({ success: false, message: "User not found." });
+      return;
+    }
+
+    user.role = role;
+    await user.save();
+
+    res.json({
+      success: true,
+      message: `User role updated to ${role} successfully.`,
+      data: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        plan: user.plan,
+        banned: user.banned ?? false,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function toggleUserBanned(
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const { id } = req.params;
+
+    const user = await User.findById(id);
+    if (!user) {
+      res.status(404).json({ success: false, message: "User not found." });
+      return;
+    }
+
+    user.banned = !user.banned;
+    await user.save();
+
+    res.json({
+      success: true,
+      message: `User ban status updated successfully.`,
+      data: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        plan: user.plan,
+        banned: user.banned ?? false,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+}

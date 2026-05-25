@@ -9,6 +9,9 @@ export interface IUser extends Document {
   bio?: string;
   role: "USER" | "ADMIN";
   plan: "free" | "pro" | "team";
+  banned?: boolean;
+  createdAt: Date;
+  updatedAt: Date;
   comparePassword(candidate: string): Promise<boolean>;
 }
 
@@ -21,6 +24,7 @@ const userSchema = new Schema<IUser>(
     bio: { type: String },
     role: { type: String, enum: ["USER", "ADMIN"], default: "USER" },
     plan: { type: String, enum: ["free", "pro", "team"], default: "free" },
+    banned: { type: Boolean, default: false },
   },
   { timestamps: true }
 );
