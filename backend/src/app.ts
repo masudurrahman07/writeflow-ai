@@ -31,26 +31,27 @@ const app = express();
 
 app.use(helmet());
 
-const allowedOrigins = env.CLIENT_URL.split(",")
-  .map((origin) => origin.trim())
-  .filter(Boolean);
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://writeflow-ai-five.vercel.app",
+];
 
 app.use(
   cors({
-    origin(origin, callback) {
-      if (!origin) {
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
-        return;
+      } else {
+        callback(new Error("Not allowed by CORS"));
       }
-      if (allowedOrigins.includes(origin)) {
-        callback(null, true);
-        return;
-      }
-      callback(new Error("Not allowed by CORS"));
     },
     credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
+
+app.options("*", cors());
 
 app.use(morgan(env.NODE_ENV === "development" ? "dev" : "combined"));
 
