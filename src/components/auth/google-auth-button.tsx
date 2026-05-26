@@ -1,8 +1,11 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
+// Google Cloud Console must allow these origins for the configured client ID:
+// - https://writeflow-ai-five.vercel.app
+// - http://localhost:3000
 interface GoogleAuthButtonProps {
   onCredential: (credential: string) => void;
   disabled?: boolean;
@@ -27,6 +30,8 @@ declare global {
             options: {
               theme: "outline";
               size: "large";
+              type?: "standard";
+              shape?: "pill";
             }
           ) => void;
         };
@@ -70,19 +75,25 @@ export function GoogleAuthButton({
   disabled = false,
   className,
 }: GoogleAuthButtonProps) {
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+
   useEffect(() => {
     let cancelled = false;
-    const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
 
+    console.log("Google origin:", window.location.origin);
     console.log("Google clientId:", clientId);
 
     if (!clientId) {
       console.error("Missing Google Client ID");
-      toast.error("Google sign-in is not configured. Please contact support.");
+      setErrorMessage("Google login not configured");
+      toast.error("Google login not configured");
       return () => {
         cancelled = true;
       };
     }
+
+    setErrorMessage(null);
 
     const initializeGoogle = async () => {
       try {
@@ -97,7 +108,7 @@ export function GoogleAuthButton({
         }
 
         window.google.accounts.id.initialize({
-          client_id: clientId,
+          client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!,
           callback: (response: GoogleCredentialResponse) => {
             console.log("Received idToken:", response.credential);
 
@@ -106,24 +117,28 @@ export function GoogleAuthButton({
               return;
             }
 
+            setErrorMessage("Google login failed. Please try again.");
             toast.error("Google sign-in failed. Please try again.");
           },
         });
 
         console.log("GIS initialized successfully");
 
-        const buttonContainer = document.getElementById("google-gsi-button");
+        const buttonContainer = document.getElementById("googleBtn");
 
-        if (buttonContainer) {
-          window.google.accounts.id.renderButton(buttonContainer, {
-            theme: "outline",
-            size: "large",
-          });
-        } else {
-          console.error("Google button container not found");
+        if (!buttonContainer) {
+          throw new Error("Google button container not found");
         }
+
+        window.google.accounts.id.renderButton(buttonContainer, {
+          theme: "outline",
+          size: "large",
+          type: "standard",
+          shape: "pill",
+        });
       } catch (error) {
         console.error("Google GIS initialization failed", error);
+        setErrorMessage("Google login failed. Please refresh and try again.");
 
         if (!cancelled) {
           toast.error("Google sign-in failed. Please try again.");
@@ -136,7 +151,7 @@ export function GoogleAuthButton({
     return () => {
       cancelled = true;
     };
-  }, [onCredential]);
+  }, [clientId, onCredential]);
 
   return (
     <div
@@ -147,7 +162,10 @@ export function GoogleAuthButton({
         pointerEvents: disabled ? "none" : "auto",
       }}
     >
-      <div id="google-gsi-button" className="w-full" />
+      <div id="googleBtn" className="w-full" />
+      {errorMessage ? (
+        <p className="mt-2 text-sm text-destructive">{errorMessage}</p>
+      ) : null}
     </div>
   );
 }
