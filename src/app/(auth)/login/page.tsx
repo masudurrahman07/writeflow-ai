@@ -22,6 +22,7 @@ import {
 } from "@/components/auth/auth-page-shell";
 import { GoogleAuthButton } from "@/components/auth/google-auth-button";
 import { api } from "@/lib/api";
+import { getAuthToken, getAuthUser, setAuthToken, setAuthUser } from "@/lib/auth";
 
 const loginSchema = z.object({
   email: z.string().email({ message: "Enter a valid email address" }),
@@ -85,31 +86,39 @@ export default function LoginPage() {
     mode: "onTouched",
   });
 
-  const onSubmit = async (data: LoginForm) => {
+  const loginWithCredentials = async (data: LoginForm) => {
     setLoading(true);
+
     try {
       const response = await api.post("/api/auth/login", data);
       const json = response.data;
 
-      if (json.success && json.data?.accessToken) {
-        const { setAuthToken, setAuthUser } = await import("@/lib/auth");
-
-        setAuthToken(json.data.accessToken);
-
-        if (json.data.user) {
-          setAuthUser({
-            id: String(json.data.user.id),
-            name: json.data.user.name,
-            email: json.data.user.email,
-            role: json.data.user.role ?? "USER",
-          });
-        }
-
-        toast.success("Logged in successfully!");
-        router.push("/dashboard");
-      } else {
+      if (!json.success || !json.data?.accessToken) {
         toast.error(json.message || "Invalid credentials");
+        return;
       }
+
+      setAuthToken(json.data.accessToken);
+
+      if (json.data.user) {
+        setAuthUser({
+          id: String(json.data.user.id),
+          name: json.data.user.name,
+          email: json.data.user.email,
+          role: json.data.user.role ?? "USER",
+        });
+      }
+
+      const persistedToken = getAuthToken();
+      const persistedUser = getAuthUser();
+
+      if (!persistedToken || !persistedUser) {
+        toast.error("Login failed to persist session. Please try again.");
+        return;
+      }
+
+      toast.success("Logged in successfully!");
+      router.replace("/dashboard");
     } catch (error) {
       const message =
         error && typeof error === "object" && "response" in error
@@ -123,10 +132,14 @@ export default function LoginPage() {
     }
   };
 
+  const onSubmit = async (data: LoginForm) => {
+    await loginWithCredentials(data);
+  };
+
   const demoLogin = async (email: string, password: string) => {
     setValue("email", email);
     setValue("password", password);
-    await handleSubmit(onSubmit)();
+    await loginWithCredentials({ email, password });
   };
 
   return (

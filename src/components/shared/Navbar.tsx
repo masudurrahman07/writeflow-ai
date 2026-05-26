@@ -6,6 +6,8 @@ import { usePathname } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
 import { useTheme } from "next-themes";
 import { toast } from "sonner";
+
+import { getAuthUser } from "@/lib/auth";
 import {
   Menu,
   Sun,
@@ -397,18 +399,36 @@ export function Navbar({ user: propUser, onLogout }: NavbarProps) {
       return;
     }
 
-    if (status === "authenticated" && session?.user) {
-      setLocalUser({
-        name: session.user.name || "User",
-        email: session.user.email || "",
-        avatarUrl: session.user.image || undefined,
-      });
-      return;
-    }
+    const syncUser = () => {
+      if (status === "authenticated" && session?.user) {
+        setLocalUser({
+          name: session.user.name || "User",
+          email: session.user.email || "",
+          avatarUrl: session.user.image || undefined,
+        });
+        return;
+      }
 
-    if (status === "unauthenticated") {
+      const storedUser = getAuthUser();
+
+      if (storedUser) {
+        setLocalUser({
+          name: storedUser.name,
+          email: storedUser.email,
+          avatarUrl: storedUser.avatar,
+        });
+        return;
+      }
+
       setLocalUser(null);
-    }
+    };
+
+    syncUser();
+    window.addEventListener("auth:changed", syncUser);
+
+    return () => {
+      window.removeEventListener("auth:changed", syncUser);
+    };
   }, [propUser, session, status]);
 
   const user = propUser ?? localUser;
@@ -420,14 +440,19 @@ export function Navbar({ user: propUser, onLogout }: NavbarProps) {
     }
 
     try {
-      await signOut({ callbackUrl: "/login" });
-    } finally {
+      if (status === "authenticated") {
+        await signOut({ callbackUrl: "/login" });
+      }
+
       localStorage.removeItem("token");
       localStorage.removeItem("accessToken");
       localStorage.removeItem("user");
       toast.success("Logged out");
+      window.location.href = "/login";
+    } catch {
+      toast.error("Unable to log out right now.");
     }
-  }, [onLogout]);
+  }, [onLogout, status]);
 
   // Shadow on scroll
   useEffect(() => {

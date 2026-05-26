@@ -22,7 +22,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Spinner } from "@/components/ui/spinner";
-import { AuthUser, logout, setAuthUser } from "@/lib/auth";
+import { AuthUser, getAuthUser, getAuthToken, logout, setAuthUser } from "@/lib/auth";
 
 const pageTitles: Record<string, string> = {
   "/dashboard": "Dashboard",
@@ -49,34 +49,55 @@ export default function DashboardLayout({
     (pathname.startsWith("/dashboard") ? "Dashboard" : "Dashboard");
 
   useEffect(() => {
-    if (status === "unauthenticated") {
-      router.replace("/login");
-      return;
-    }
+    const syncAuthState = () => {
+      if (status === "authenticated" && session?.user) {
+        const nextUser = {
+          id: session.user.email ?? "nextauth-user",
+          name: session.user.name ?? "User",
+          email: session.user.email ?? "",
+          role: "USER" as const,
+        } as AuthUser;
 
-    if (status === "authenticated") {
-      const nextUser = session?.user
-        ? ({
-            id: session.user.email ?? "nextauth-user",
-            name: session.user.name ?? "User",
-            email: session.user.email ?? "",
-            role: "USER" as const,
-          } as AuthUser)
-        : null;
-
-      if (nextUser) {
         setAuthUser(nextUser);
         setUser(nextUser);
+        setReady(true);
+        return;
       }
+
+      if (status === "loading") {
+        return;
+      }
+
+      const token = getAuthToken();
+      const storedUser = getAuthUser();
+
+      if (!token || !storedUser) {
+        router.replace("/login");
+        return;
+      }
+
+      setUser(storedUser);
       setReady(true);
-    }
+    };
+
+    syncAuthState();
+
+    window.addEventListener("auth:changed", syncAuthState);
+
+    return () => {
+      window.removeEventListener("auth:changed", syncAuthState);
+    };
   }, [router, session, status]);
 
   const handleLogout = async () => {
     try {
-      await signOut({ callbackUrl: "/login" });
+      if (status === "authenticated") {
+        await signOut({ callbackUrl: "/login" });
+      }
+
       logout();
       toast.success("Logged out");
+      router.push("/login");
     } catch {
       toast.error("Unable to log out right now.");
     }

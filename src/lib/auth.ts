@@ -1,6 +1,7 @@
 const TOKEN_KEY = "token";
 const ACCESS_TOKEN_KEY = "accessToken";
 const USER_KEY = "user";
+const AUTH_CHANGED_EVENT = "auth:changed";
 
 export interface AuthUser {
   id: string;
@@ -9,6 +10,14 @@ export interface AuthUser {
   role: "USER" | "ADMIN";
   avatar?: string;
   plan?: string;
+}
+
+function notifyAuthChanged() {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  window.dispatchEvent(new Event(AUTH_CHANGED_EVENT));
 }
 
 export function getAuthToken(): string | null {
@@ -22,11 +31,13 @@ export function getAuthToken(): string | null {
 export function setAuthToken(token: string): void {
   localStorage.setItem(TOKEN_KEY, token);
   localStorage.setItem(ACCESS_TOKEN_KEY, token);
+  notifyAuthChanged();
 }
 
 export function clearAuthToken(): void {
   localStorage.removeItem(TOKEN_KEY);
   localStorage.removeItem(ACCESS_TOKEN_KEY);
+  notifyAuthChanged();
 }
 
 export function isAuthenticated(): boolean {
@@ -46,10 +57,12 @@ export function getAuthUser(): AuthUser | null {
 
 export function setAuthUser(user: AuthUser): void {
   localStorage.setItem(USER_KEY, JSON.stringify(user));
+  notifyAuthChanged();
 }
 
 export function clearAuthUser(): void {
   localStorage.removeItem(USER_KEY);
+  notifyAuthChanged();
 }
 
 export function logout(): void {
