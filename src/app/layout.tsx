@@ -30,6 +30,11 @@ export default function RootLayout({
           inter.variable
         )}
       >
+        <script
+          src="https://accounts.google.com/gsi/client"
+          async
+          defer
+        />
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
@@ -38,17 +43,17 @@ export default function RootLayout({
         >
           <AuthProvider>
             <Toaster position="bottom-right" richColors closeButton />
-          <div className="relative flex min-h-screen flex-col">
-            {/*
-             * Pass `user` prop from your auth session here.
-             * Example with next-auth:
-             *   const session = await getServerSession();
-             *   <Navbar user={session?.user ?? null} />
-             */}
-            <Navbar user={null} />
-            <main className="flex-1">{children}</main>
-            <Footer />
-          </div>
+            <div className="relative flex min-h-screen flex-col">
+              {/*
+               * Pass `user` prop from your auth session here.
+               * Example with next-auth:
+               *   const session = await getServerSession();
+               *   <Navbar user={session?.user ?? null} />
+               */}
+              <Navbar user={null} />
+              <main className="flex-1">{children}</main>
+              <Footer />
+            </div>
           </AuthProvider>
         </ThemeProvider>
       </body>

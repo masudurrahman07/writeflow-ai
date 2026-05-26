@@ -1,9 +1,7 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { toast } from "sonner";
-
-import { Button } from "@/components/ui/button";
 
 interface GoogleAuthButtonProps {
   onCredential: (credential: string) => void;
@@ -15,63 +13,55 @@ interface GoogleCredentialResponse {
   credential?: string;
 }
 
-interface GoogleIdentityServices {
-  accounts: {
-    id: {
-      initialize: (options: {
-        client_id: string;
-        callback: (response: GoogleCredentialResponse) => void;
-      }) => void;
-      prompt: () => void;
-    };
-  };
-}
-
 declare global {
   interface Window {
-    google?: GoogleIdentityServices;
+    google?: {
+      accounts: {
+        id: {
+          initialize: (options: {
+            client_id: string;
+            callback: (response: GoogleCredentialResponse) => void;
+          }) => void;
+          renderButton: (
+            element: HTMLElement | null,
+            options: {
+              theme: "outline";
+              size: "large";
+            }
+          ) => void;
+        };
+      };
+    };
   }
 }
 
-const GOOGLE_SCRIPT_ID = "google-gsi-script";
-const GOOGLE_SCRIPT_SRC = "https://accounts.google.com/gsi/client";
-
-async function loadGoogleScript(): Promise<void> {
+function waitForGoogleSDK(timeoutMs = 5000): Promise<void> {
   if (typeof window === "undefined") {
-    throw new Error("window is unavailable");
+    return Promise.reject(new Error("window is unavailable"));
   }
 
   if (window.google?.accounts?.id) {
-    return;
+    return Promise.resolve();
   }
 
-  const existingScript = document.getElementById(GOOGLE_SCRIPT_ID);
+  return new Promise((resolve, reject) => {
+    const startTime = Date.now();
 
-  if (existingScript) {
-    await new Promise<void>((resolve, reject) => {
-      existingScript.addEventListener(
-        "load",
-        () => resolve(),
-        { once: true }
-      );
-      existingScript.addEventListener(
-        "error",
-        () => reject(new Error("Failed to load Google script")),
-        { once: true }
-      );
-    });
-    return;
-  }
+    const check = () => {
+      if (window.google?.accounts?.id) {
+        resolve();
+        return;
+      }
 
-  await new Promise<void>((resolve, reject) => {
-    const script = document.createElement("script");
-    script.id = GOOGLE_SCRIPT_ID;
-    script.src = GOOGLE_SCRIPT_SRC;
-    script.async = true;
-    script.defer = true;
-    script.onload = () => resolve();
-    script.onerror = () => reject(new Error("Failed to load Google script"));
-    document.body.appendChild(script);
+      if (Date.now() - startTime >= timeoutMs) {
+        reject(new Error("Google Identity Services did not load in time"));
+        return;
+      }
+
+      setTimeout(check, 100);
+    };
+
+    check();
   });
 }
 
@@ -80,45 +70,61 @@ export function GoogleAuthButton({
   disabled = false,
   className,
 }: GoogleAuthButtonProps) {
-  const callbackRef = useRef(onCredential);
-  const initializedRef = useRef(false);
-
-  callbackRef.current = onCredential;
-
   useEffect(() => {
     let cancelled = false;
+    const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+
+    console.log("Google clientId:", clientId);
+
+    if (!clientId) {
+      console.error("Missing Google Client ID");
+      toast.error("Google sign-in is not configured. Please contact support.");
+      return () => {
+        cancelled = true;
+      };
+    }
 
     const initializeGoogle = async () => {
       try {
-        await loadGoogleScript();
+        await waitForGoogleSDK();
 
         if (cancelled) {
           return;
         }
 
-        const google = window.google;
-        const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
-
-        if (!google?.accounts?.id) {
+        if (!window.google?.accounts?.id) {
           throw new Error("Google Identity Services is unavailable");
         }
 
-        if (!initializedRef.current) {
-          google.accounts.id.initialize({
-            client_id: clientId || "",
-            callback: (response: GoogleCredentialResponse) => {
-              if (response?.credential) {
-                callbackRef.current(response.credential);
-                return;
-              }
+        window.google.accounts.id.initialize({
+          client_id: clientId,
+          callback: (response: GoogleCredentialResponse) => {
+            console.log("Received idToken:", response.credential);
 
-              toast.error("Google sign-in failed. Please try again.");
-            },
+            if (response.credential) {
+              onCredential(response.credential);
+              return;
+            }
+
+            toast.error("Google sign-in failed. Please try again.");
+          },
+        });
+
+        console.log("GIS initialized successfully");
+
+        const buttonContainer = document.getElementById("google-gsi-button");
+
+        if (buttonContainer) {
+          window.google.accounts.id.renderButton(buttonContainer, {
+            theme: "outline",
+            size: "large",
           });
-
-          initializedRef.current = true;
+        } else {
+          console.error("Google button container not found");
         }
-      } catch {
+      } catch (error) {
+        console.error("Google GIS initialization failed", error);
+
         if (!cancelled) {
           toast.error("Google sign-in failed. Please try again.");
         }
@@ -130,32 +136,18 @@ export function GoogleAuthButton({
     return () => {
       cancelled = true;
     };
-  }, []);
-
-  const handleGoogleClick = async () => {
-    try {
-      await loadGoogleScript();
-
-      const google = window.google;
-
-      if (!google?.accounts?.id) {
-        throw new Error("Google Identity Services is unavailable");
-      }
-
-      google.accounts.id.prompt();
-    } catch {
-      toast.error("Google sign-in failed. Please try again.");
-    }
-  };
+  }, [onCredential]);
 
   return (
-    <Button
-      type="button"
-      onClick={handleGoogleClick}
-      disabled={disabled}
+    <div
       className={className}
+      style={{
+        width: "100%",
+        opacity: disabled ? 0.7 : 1,
+        pointerEvents: disabled ? "none" : "auto",
+      }}
     >
-      Continue with Google
-    </Button>
+      <div id="google-gsi-button" className="w-full" />
+    </div>
   );
 }
