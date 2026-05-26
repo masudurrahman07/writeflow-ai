@@ -80,7 +80,7 @@ export default function LoginPage() {
   const onSubmit = async (data: LoginForm) => {
     setLoading(true);
     try {
-      const response = await api.post("/auth/login", data);
+      const response = await api.post("/api/auth/login", data);
       const json = response.data;
 
       if (json.success && json.data?.accessToken) {

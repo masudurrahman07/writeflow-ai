@@ -6,6 +6,7 @@ import { useSession } from "next-auth/react";
 import { toast } from "sonner";
 
 import { Spinner } from "@/components/ui/spinner";
+import { api } from "@/lib/api";
 
 interface GoogleLoginResponse {
   success: boolean;
@@ -38,13 +39,9 @@ export default function GoogleCallbackPage() {
 
       setExchanging(true);
       try {
-        const res = await fetch("/api/auth/google", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ idToken }),
-        });
-        const json = (await res.json()) as GoogleLoginResponse;
-        if (res.ok && json.success && json.data?.accessToken) {
+        const response = await api.post("/api/auth/google", { idToken });
+        const json = response.data as GoogleLoginResponse;
+        if (json.success && json.data?.accessToken) {
           const { setAuthToken, setAuthUser } = await import("@/lib/auth");
           setAuthToken(json.data.accessToken);
           if (json.data.user) {

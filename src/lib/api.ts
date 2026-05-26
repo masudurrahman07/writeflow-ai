@@ -9,12 +9,17 @@ const api = axios.create({
   },
 });
 
+console.log("Final API URL:", api.defaults.baseURL);
+
 api.interceptors.request.use((config) => {
   const token = getAuthToken();
 
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+
+  const fullUrl = `${api.defaults.baseURL ?? ""}${config.url ?? ""}`;
+  console.log("Calling backend API:", fullUrl);
 
   return config;
 });

@@ -69,6 +69,7 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use("/api/v1", apiRoutes);
 
+console.log("Backend route registration: /api/auth -> authRoutes");
 app.use("/api/auth", authRoutes);
 
 app.use("/api/ai", aiRoutes);
