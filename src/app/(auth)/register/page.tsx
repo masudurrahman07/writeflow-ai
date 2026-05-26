@@ -1,10 +1,9 @@
 /* src/app/(auth)/register/page.tsx */
 "use client";
 
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -21,6 +20,7 @@ import {
   SocialIconButton,
   TwitterIcon,
 } from "@/components/auth/auth-page-shell";
+import { GoogleAuthButton } from "@/components/auth/google-auth-button";
 import { api } from "@/lib/api";
 
 const registerSchema = z
@@ -128,11 +128,39 @@ export default function RegisterPage() {
     }
   }
 
-  const handleGoogle = async () => {
+  const handleGoogleCredential = useCallback(async (credential: string) => {
     setLoading(true);
-    await signIn("google", { callbackUrl: "/google-callback" });
-    setLoading(false);
-  };
+
+    try {
+      const response = await api.post("/api/auth/google", { idToken: credential });
+      const json = response.data;
+
+      if (json.success && json.data?.accessToken) {
+        const { setAuthToken, setAuthUser } = await import("@/lib/auth");
+
+        setAuthToken(json.data.accessToken);
+
+        if (json.data.user) {
+          setAuthUser({
+            id: String(json.data.user.id),
+            name: json.data.user.name,
+            email: json.data.user.email,
+            role: json.data.user.role ?? "USER",
+          });
+        }
+
+        toast.success("Logged in successfully!");
+        router.push("/dashboard");
+        return;
+      }
+
+      toast.error(json.message || "Google sign-in failed. Please try again.");
+    } catch {
+      toast.error("Google sign-in failed. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  }, [router]);
 
   return (
     <AuthPageShell
@@ -230,15 +258,11 @@ export default function RegisterPage() {
       </form>
 
       <div className="w-full space-y-4 pt-2">
-        <Button
-          type="button"
-          className="h-12 w-full rounded-[1.1rem] border border-white/25 bg-white/65 text-foreground shadow-[0_16px_40px_-28px_rgba(59,130,246,0.45)] backdrop-blur-xl transition-transform duration-200 hover:scale-[1.01] dark:border-white/10 dark:bg-slate-950/45"
-          onClick={handleGoogle}
+        <GoogleAuthButton
+          onCredential={handleGoogleCredential}
           disabled={loading}
-        >
-          {loading ? <Spinner className="mr-2 h-4 w-4" /> : null}
-          Continue with Google
-        </Button>
+          className="h-12 w-full rounded-[1.1rem] border border-white/25 bg-white/65 text-foreground shadow-[0_16px_40px_-28px_rgba(59,130,246,0.45)] backdrop-blur-xl transition-transform duration-200 hover:scale-[1.01] dark:border-white/10 dark:bg-slate-950/45"
+        />
 
         <div className="flex items-center justify-center gap-3 pt-1">
           <SocialIconButton icon={GithubIcon} label="Github" />
