@@ -1,9 +1,10 @@
 /* src/app/(auth)/register/page.tsx */
 "use client";
 
-import { useCallback, useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -72,9 +73,16 @@ function FloatingField({
 
 export default function RegisterPage() {
   const router = useRouter();
+  const { status } = useSession();
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  useEffect(() => {
+    if (status === "authenticated") {
+      router.replace("/dashboard");
+    }
+  }, [router, status]);
 
   const {
     register,
@@ -127,40 +135,6 @@ export default function RegisterPage() {
       setLoading(false);
     }
   }
-
-  const handleGoogleCredential = useCallback(async (credential: string) => {
-    setLoading(true);
-
-    try {
-      const response = await api.post("/api/auth/google", { idToken: credential });
-      const json = response.data;
-
-      if (json.success && json.data?.accessToken) {
-        const { setAuthToken, setAuthUser } = await import("@/lib/auth");
-
-        setAuthToken(json.data.accessToken);
-
-        if (json.data.user) {
-          setAuthUser({
-            id: String(json.data.user.id),
-            name: json.data.user.name,
-            email: json.data.user.email,
-            role: json.data.user.role ?? "USER",
-          });
-        }
-
-        toast.success("Logged in successfully!");
-        router.push("/dashboard");
-        return;
-      }
-
-      toast.error(json.message || "Google sign-in failed. Please try again.");
-    } catch {
-      toast.error("Google sign-in failed. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  }, [router]);
 
   return (
     <AuthPageShell
@@ -259,7 +233,6 @@ export default function RegisterPage() {
 
       <div className="w-full space-y-4 pt-2">
         <GoogleAuthButton
-          onCredential={handleGoogleCredential}
           disabled={loading}
           className="h-12 w-full rounded-[1.1rem] border border-white/25 bg-white/65 text-foreground shadow-[0_16px_40px_-28px_rgba(59,130,246,0.45)] backdrop-blur-xl transition-transform duration-200 hover:scale-[1.01] dark:border-white/10 dark:bg-slate-950/45"
         />

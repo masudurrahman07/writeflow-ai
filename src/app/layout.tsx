@@ -30,11 +30,6 @@ export default function RootLayout({
           inter.variable
         )}
       >
-        <script
-          src="https://accounts.google.com/gsi/client"
-          async
-          defer
-        />
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

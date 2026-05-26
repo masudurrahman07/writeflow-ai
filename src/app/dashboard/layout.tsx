@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { signOut, useSession } from "next-auth/react";
 import { Menu, ChevronDown, LogOut, Settings, User } from "lucide-react";
 import { toast } from "sonner";
 
@@ -21,14 +22,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Spinner } from "@/components/ui/spinner";
-import { apiFetch } from "@/lib/api";
-import {
-  AuthUser,
-  getAuthUser,
-  isAuthenticated,
-  logout,
-  setAuthUser,
-} from "@/lib/auth";
+import { AuthUser, logout, setAuthUser } from "@/lib/auth";
 
 const pageTitles: Record<string, string> = {
   "/dashboard": "Dashboard",
@@ -38,11 +32,6 @@ const pageTitles: Record<string, string> = {
   "/dashboard/usage": "AI Usage History",
 };
 
-interface MeResponse {
-  success: boolean;
-  data: { user: AuthUser };
-}
-
 export default function DashboardLayout({
   children,
 }: {
@@ -50,6 +39,7 @@ export default function DashboardLayout({
 }) {
   const router = useRouter();
   const pathname = usePathname();
+  const { data: session, status } = useSession();
   const [ready, setReady] = useState(false);
   const [user, setUser] = useState<AuthUser | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -59,38 +49,37 @@ export default function DashboardLayout({
     (pathname.startsWith("/dashboard") ? "Dashboard" : "Dashboard");
 
   useEffect(() => {
-    if (!isAuthenticated()) {
+    if (status === "unauthenticated") {
       router.replace("/login");
       return;
     }
 
-    async function loadUser() {
-      const cached = getAuthUser();
-      if (cached) {
-        setUser(cached);
-        setReady(true);
-        return;
-      }
-      try {
-        const res = await apiFetch<MeResponse>("/api/auth/me");
-        setAuthUser(res.data.user);
-        setUser(res.data.user);
-      } catch {
-        toast.error("Session expired. Please log in again.");
-        logout();
-        router.replace("/login");
-        return;
+    if (status === "authenticated") {
+      const nextUser = session?.user
+        ? ({
+            id: session.user.email ?? "nextauth-user",
+            name: session.user.name ?? "User",
+            email: session.user.email ?? "",
+            role: "USER" as const,
+          } as AuthUser)
+        : null;
+
+      if (nextUser) {
+        setAuthUser(nextUser);
+        setUser(nextUser);
       }
       setReady(true);
     }
+  }, [router, session, status]);
 
-    loadUser();
-  }, [router]);
-
-  const handleLogout = () => {
-    logout();
-    toast.success("Logged out");
-    router.push("/login");
+  const handleLogout = async () => {
+    try {
+      await signOut({ callbackUrl: "/login" });
+      logout();
+      toast.success("Logged out");
+    } catch {
+      toast.error("Unable to log out right now.");
+    }
   };
 
   if (!ready) {

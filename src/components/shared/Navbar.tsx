@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { signOut, useSession } from "next-auth/react";
 import { useTheme } from "next-themes";
 import { toast } from "sonner";
 import {
@@ -388,42 +389,44 @@ export function Navbar({ user: propUser, onLogout }: NavbarProps) {
   const [scrolled, setScrolled] = useState(false);
   const [localUser, setLocalUser] = useState<NavbarProps["user"]>(null);
   const pathname = usePathname();
+  const { data: session, status } = useSession();
 
-  // Detect auth state from localStorage when user prop is not provided
   useEffect(() => {
     if (propUser) {
       setLocalUser(propUser);
       return;
     }
-    try {
-      const raw = localStorage.getItem("user");
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        setLocalUser({
-          name: parsed.name,
-          email: parsed.email,
-          avatarUrl: parsed.avatar,
-        });
-      } else {
-        setLocalUser(null);
-      }
-    } catch {
+
+    if (status === "authenticated" && session?.user) {
+      setLocalUser({
+        name: session.user.name || "User",
+        email: session.user.email || "",
+        avatarUrl: session.user.image || undefined,
+      });
+      return;
+    }
+
+    if (status === "unauthenticated") {
       setLocalUser(null);
     }
-  }, [propUser, pathname]);
+  }, [propUser, session, status]);
 
   const user = propUser ?? localUser;
 
-  const handleLogout = useCallback(() => {
+  const handleLogout = useCallback(async () => {
     if (onLogout) {
       onLogout();
       return;
     }
-    localStorage.removeItem("token");
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("user");
-    toast.success("Logged out");
-    window.location.href = "/login";
+
+    try {
+      await signOut({ callbackUrl: "/login" });
+    } finally {
+      localStorage.removeItem("token");
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("user");
+      toast.success("Logged out");
+    }
   }, [onLogout]);
 
   // Shadow on scroll
