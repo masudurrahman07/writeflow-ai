@@ -14,7 +14,6 @@
  * 10. Footer          — imported shared component
  */
 
-import { Toaster } from "sonner";
 import { HeroSection } from "./(landing)/sections/HeroSection";
 import { FeaturesSection } from "./(landing)/sections/FeaturesSection";
 import { HowItWorksSection } from "./(landing)/sections/HowItWorksSection";
@@ -28,9 +27,6 @@ import { NewsletterSection } from "./(landing)/sections/NewsletterSection";
 export default function HomePage() {
   return (
     <>
-      {/* Sonner toast provider — required for newsletter success toast */}
-      <Toaster position="bottom-right" richColors closeButton />
-
       <HeroSection />
       <FeaturesSection />
       <HowItWorksSection />

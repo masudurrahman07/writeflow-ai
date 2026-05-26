@@ -27,6 +27,7 @@ export default function ContactPage() {
     reset,
   } = useForm<FormData>({ resolver: zodResolver(schema) });
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const onSubmit = async (data: FormData) => {
     setLoading(true);
     setTimeout(() => {
@@ -41,7 +42,7 @@ export default function ContactPage() {
     <div className="max-w-3xl mx-auto py-10 px-4 grid md:grid-cols-2 gap-8 items-start">
       <div>
         <h1 className="text-3xl font-bold mb-2">Contact Us</h1>
-        <p className="text-muted-foreground mb-6">We'd love to hear from you! Fill out the form and our team will respond within 24 hours.</p>
+        <p className="text-muted-foreground mb-6">We&apos;d love to hear from you! Fill out the form and our team will respond within 24 hours.</p>
         <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
           <Input placeholder="Full Name" {...register("name")}
             aria-invalid={!!errors.name} />
@@ -58,7 +59,7 @@ export default function ContactPage() {
           <Button type="submit" className="w-full mt-2" disabled={loading}>
             {loading ? "Sending..." : "Send Message"}
           </Button>
-          {sent && <span className="block text-success text-center mt-2">Message sent! We'll get back to you within 24 hours.</span>}
+          {sent && <span className="block text-success text-center mt-2">Message sent! We&apos;ll get back to you within 24 hours.</span>}
         </form>
       </div>
       <Card className="mt-8 md:mt-0">

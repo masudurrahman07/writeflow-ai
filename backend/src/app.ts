@@ -14,6 +14,8 @@ import aiRoutes from "./routes/ai.routes";
 import documentRoutes from "./routes/document.routes";
 import userRoutes from "./routes/user.routes";
 import dashboardRoutes from "./routes/dashboard.routes";
+import templateRoutes from "./routes/template.routes";
+import reviewRoutes from "./routes/review.routes";
 
 import { env } from "./config/env";
 
@@ -29,16 +31,25 @@ const app = express();
 
 app.use(helmet());
 
+const allowedOrigins = env.CLIENT_URL.split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
 app.use(
-
   cors({
-
-    origin: env.CLIENT_URL,
-
+    origin(origin, callback) {
+      if (!origin) {
+        callback(null, true);
+        return;
+      }
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true);
+        return;
+      }
+      callback(new Error("Not allowed by CORS"));
+    },
     credentials: true,
-
   })
-
 );
 
 app.use(morgan(env.NODE_ENV === "development" ? "dev" : "combined"));
@@ -63,6 +74,8 @@ app.use("/api/ai", aiRoutes);
 app.use("/api/documents", documentRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/items", templateRoutes);
+app.use("/api/reviews", reviewRoutes);
 
 
 

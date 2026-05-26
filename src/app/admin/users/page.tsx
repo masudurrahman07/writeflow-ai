@@ -34,7 +34,11 @@ export default function AdminUsersPage() {
       .finally(() => setLoading(false));
   }, [search, page]);
 
-  const columns = [
+  const columns: Array<{
+    key: keyof UserRow;
+    label: string;
+    render?: (row: UserRow) => React.ReactNode;
+  }> = [
     { key: "name", label: "Name" },
     { key: "email", label: "Email" },
     {
@@ -60,14 +64,16 @@ export default function AdminUsersPage() {
       key: "banned",
       label: "Status",
       render: (row: UserRow) => (
-        <Badge variant={row.banned ? "destructive" : "success"}>{row.banned ? "Banned" : "Active"}</Badge>
+        <Badge variant={row.banned ? "destructive" : "secondary"}>{row.banned ? "Banned" : "Active"}</Badge>
       ),
     },
   ];
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   function handleRoleToggle(user: UserRow) {
     // TODO: Implement role toggle
   }
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   function handleBanToggle(user: UserRow) {
     // TODO: Implement ban/unban toggle
   }
@@ -102,7 +108,7 @@ export default function AdminUsersPage() {
                 </Button>
                 <Button
                   size="sm"
-                  variant={row.banned ? "success" : "destructive"}
+                  variant={row.banned ? "secondary" : "destructive"}
                   onClick={() => handleBanToggle(row)}
                   disabled={loading}
                 >

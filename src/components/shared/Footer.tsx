@@ -60,7 +60,7 @@ const footerColumns = [
     links: [
       { label: "Explore", href: "/explore" },
       { label: "Dashboard", href: "/dashboard" },
-      { label: "My Documents", href: "/documents" },
+      { label: "My Documents", href: "/dashboard/documents" },
       { label: "Pricing", href: "/pricing" },
     ],
   },
@@ -70,7 +70,6 @@ const footerColumns = [
       { label: "About", href: "/about" },
       { label: "Blog", href: "/blog" },
       { label: "Contact", href: "/contact" },
-      { label: "Careers", href: "/careers" },
     ],
   },
   {

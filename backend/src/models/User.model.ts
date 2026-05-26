@@ -19,7 +19,7 @@ const userSchema = new Schema<IUser>(
   {
     name: { type: String, required: true, trim: true, maxlength: 100 },
     email: { type: String, required: true, unique: true, lowercase: true, trim: true, match: [/^\S+@\S+\.\S+$/, "Please provide a valid email"] },
-    password: { type: String, required: true, minlength: 8, select: false },
+    password: { type: String, required: true, minlength: 6, select: false },
     avatar: { type: String },
     bio: { type: String },
     role: { type: String, enum: ["USER", "ADMIN"], default: "USER" },

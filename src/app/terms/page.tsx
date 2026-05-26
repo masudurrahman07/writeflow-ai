@@ -24,7 +24,7 @@ export default function TermsPage() {
       </section>
       <section className="mb-6">
         <h2 className="text-lg font-semibold mb-2">Limitation of Liability</h2>
-        <p>WriteFlow AI is provided "as is" without warranties. We are not liable for damages arising from your use of the service or AI-generated content.</p>
+        <p>WriteFlow AI is provided &quot;as is&quot; without warranties. We are not liable for damages arising from your use of the service or AI-generated content.</p>
       </section>
       <section className="mb-6">
         <h2 className="text-lg font-semibold mb-2">Changes to Terms</h2>

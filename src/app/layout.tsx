@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { ThemeProvider, Navbar, Footer } from "@/components/shared";
+import { ThemeProvider, Navbar, Footer, AuthProvider } from "@/components/shared";
 import { siteConfig } from "@/config/site";
 import { cn } from "@/lib/utils";
 import { Toaster } from "sonner";
@@ -36,7 +36,8 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-            <Toaster />
+          <AuthProvider>
+            <Toaster position="bottom-right" richColors closeButton />
           <div className="relative flex min-h-screen flex-col">
             {/*
              * Pass `user` prop from your auth session here.
@@ -48,6 +49,7 @@ export default function RootLayout({
             <main className="flex-1">{children}</main>
             <Footer />
           </div>
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>

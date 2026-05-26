@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "backend:dev": "npm run dev --prefix backend",
-    "backend:build": "npm run build --prefix backend"
+    "backend:build": "npm run build --prefix backend",
+    "seed": "npm run seed --prefix backend"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.4.0",

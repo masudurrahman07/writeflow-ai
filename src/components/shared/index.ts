@@ -11,3 +11,4 @@ export { Container } from "./Container";
 export { SectionTitle } from "./SectionTitle";
 export { SkeletonCard } from "./SkeletonCard";
 export { ThemeProvider } from "./ThemeProvider";
+export { AuthProvider } from "./AuthProvider";

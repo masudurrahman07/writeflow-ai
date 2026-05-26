@@ -2,19 +2,24 @@ import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import { User } from "../models/User.model";
 import { env } from "../config/env";
+import crypto from "crypto";
+import https from "https";
 
 interface JwtPayload {
   userId: string;
 }
 
 function signAccessToken(userId: string): string {
-  return jwt.sign({ userId }, process.env.JWT_SECRET as string, {
+  if (!env.JWT_SECRET) {
+    throw new Error("JWT_SECRET is not set");
+  }
+  return jwt.sign({ userId }, env.JWT_SECRET, {
     expiresIn: env.JWT_EXPIRES_IN,
   } as jwt.SignOptions);
 }
 
 function signRefreshToken(userId: string): string {
-  return jwt.sign({ userId }, process.env.JWT_REFRESH_SECRET as string, {
+  return jwt.sign({ userId }, env.JWT_REFRESH_SECRET, {
     expiresIn: env.JWT_REFRESH_EXPIRES_IN,
   } as jwt.SignOptions);
 }
@@ -150,6 +155,85 @@ export async function refreshToken(
     res.json({
       success: true,
       data: { accessToken, refreshToken },
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+function getGoogleTokenInfo(
+  idToken: string
+): Promise<{ email?: string; email_verified?: string; name?: string; aud?: string }> {
+  const url = new URL("https://oauth2.googleapis.com/tokeninfo");
+  url.searchParams.set("id_token", idToken);
+
+  return new Promise((resolve, reject) => {
+    https
+      .get(url, (resp) => {
+        let data = "";
+        resp.on("data", (chunk) => {
+          data += String(chunk);
+        });
+        resp.on("end", () => {
+          try {
+            resolve(JSON.parse(data));
+          } catch (err) {
+            reject(err);
+          }
+        });
+      })
+      .on("error", reject);
+  });
+}
+
+export async function googleLogin(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const { idToken } = req.body as { idToken?: string };
+    if (!idToken) {
+      res.status(400).json({ success: false, message: "idToken is required." });
+      return;
+    }
+
+    const info = await getGoogleTokenInfo(idToken);
+    if (!info.email || info.email_verified !== "true") {
+      res.status(401).json({ success: false, message: "Invalid Google token." });
+      return;
+    }
+    if (env.GOOGLE_CLIENT_ID && info.aud && info.aud !== env.GOOGLE_CLIENT_ID) {
+      res.status(401).json({ success: false, message: "Invalid Google token." });
+      return;
+    }
+
+    const email = info.email.toLowerCase();
+    let user = await User.findOne({ email });
+    if (!user) {
+      const randomPassword = crypto.randomBytes(32).toString("hex");
+      user = await User.create({
+        name: info.name ?? email.split("@")[0],
+        email,
+        password: randomPassword,
+      });
+    }
+
+    const accessToken = signAccessToken(String(user._id));
+    const refreshToken = signRefreshToken(String(user._id));
+
+    res.json({
+      success: true,
+      data: {
+        user: {
+          id: user._id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+        },
+        accessToken,
+        refreshToken,
+      },
     });
   } catch (error) {
     next(error);

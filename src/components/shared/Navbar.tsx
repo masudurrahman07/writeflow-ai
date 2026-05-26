@@ -1,14 +1,14 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTheme } from "next-themes";
+import { toast } from "sonner";
 import {
   Menu,
   Sun,
   Moon,
-  Laptop,
   PenLine,
   ChevronDown,
   LayoutDashboard,
@@ -78,7 +78,7 @@ const privateNavIcons: Record<string, React.ElementType> = {
 // ─── Theme Toggle ─────────────────────────────────────────────────────────────
 
 function ThemeToggle({ className }: { className?: string }) {
-  const { theme, setTheme } = useTheme();
+  const { setTheme, resolvedTheme } = useTheme();
   const mounted = useMounted();
 
   // Stable placeholder prevents layout shift before hydration
@@ -96,19 +96,7 @@ function ThemeToggle({ className }: { className?: string }) {
     );
   }
 
-  const cycles: Record<string, string> = {
-    dark: "light",
-    light: "system",
-    system: "dark",
-  };
-
-  const labels: Record<string, string> = {
-    dark: "Switch to light mode",
-    light: "Switch to system theme",
-    system: "Switch to dark mode",
-  };
-
-  const currentTheme = theme ?? "system";
+  const isDark = resolvedTheme === "dark";
 
   return (
     <Button
@@ -118,16 +106,10 @@ function ThemeToggle({ className }: { className?: string }) {
         "h-9 w-9 shrink-0 text-muted-foreground hover:text-foreground",
         className
       )}
-      onClick={() => setTheme(cycles[currentTheme] ?? "system")}
-      aria-label={labels[currentTheme] ?? "Toggle theme"}
+      onClick={() => setTheme(isDark ? "light" : "dark")}
+      aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
     >
-      {currentTheme === "dark" ? (
-        <Sun className="h-4 w-4" />
-      ) : currentTheme === "light" ? (
-        <Moon className="h-4 w-4" />
-      ) : (
-        <Laptop className="h-4 w-4" />
-      )}
+      {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
     </Button>
   );
 }
@@ -136,16 +118,20 @@ function ThemeToggle({ className }: { className?: string }) {
 
 function DesktopNavLink({ href, label }: { href: string; label: string }) {
   const pathname = usePathname();
-  const isActive = pathname === href || pathname.startsWith(href + "/");
+  const isActive = href === "/"
+    ? pathname === "/"
+    : pathname.startsWith(href + "/") || pathname === href;
 
   return (
     <Link
       href={href}
       className={cn(
-        "text-sm font-medium transition-colors rounded-sm",
+        "relative text-sm font-medium transition-colors rounded-sm",
         "hover:text-foreground",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-        isActive ? "text-foreground" : "text-muted-foreground"
+        isActive
+          ? "text-foreground after:absolute after:-bottom-1 after:left-0 after:h-0.5 after:w-full after:rounded-full after:bg-primary"
+          : "text-muted-foreground"
       )}
     >
       {label}
@@ -160,7 +146,7 @@ function ProfileDropdown({
   onLogout,
 }: {
   user: NonNullable<NavbarProps["user"]>;
-  onLogout?: () => void;
+  onLogout: () => void;
 }) {
   const initials = user.name
     .split(" ")
@@ -241,7 +227,7 @@ function MobileSheetMenu({
   open: boolean;
   onOpenChange: (open: boolean) => void;
   user: NavbarProps["user"];
-  onLogout?: () => void;
+  onLogout: () => void;
 }) {
   const pathname = usePathname();
   const navItems = user ? siteConfig.navPrivate : siteConfig.navPublic;
@@ -396,13 +382,49 @@ function MobileSheetMenu({
  *
  * Mobile (≤ md): hamburger button opens a shadcn Sheet sliding from the left.
  * Desktop (≥ md): inline nav links + theme toggle + auth controls.
- *
- * Dark/light/system theme toggle cycles through all three modes.
  */
-export function Navbar({ user, onLogout }: NavbarProps) {
+export function Navbar({ user: propUser, onLogout }: NavbarProps) {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [localUser, setLocalUser] = useState<NavbarProps["user"]>(null);
   const pathname = usePathname();
+
+  // Detect auth state from localStorage when user prop is not provided
+  useEffect(() => {
+    if (propUser) {
+      setLocalUser(propUser);
+      return;
+    }
+    try {
+      const raw = localStorage.getItem("user");
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        setLocalUser({
+          name: parsed.name,
+          email: parsed.email,
+          avatarUrl: parsed.avatar,
+        });
+      } else {
+        setLocalUser(null);
+      }
+    } catch {
+      setLocalUser(null);
+    }
+  }, [propUser, pathname]);
+
+  const user = propUser ?? localUser;
+
+  const handleLogout = useCallback(() => {
+    if (onLogout) {
+      onLogout();
+      return;
+    }
+    localStorage.removeItem("token");
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("user");
+    toast.success("Logged out");
+    window.location.href = "/login";
+  }, [onLogout]);
 
   // Shadow on scroll
   useEffect(() => {
@@ -467,7 +489,7 @@ export function Navbar({ user, onLogout }: NavbarProps) {
             {/* Desktop auth / profile */}
             <div className="hidden md:flex items-center gap-2">
               {user ? (
-                <ProfileDropdown user={user} onLogout={onLogout} />
+                <ProfileDropdown user={user} onLogout={handleLogout} />
               ) : (
                 <>
                   <Button variant="ghost" size="sm" asChild>
@@ -500,7 +522,7 @@ export function Navbar({ user, onLogout }: NavbarProps) {
         open={sheetOpen}
         onOpenChange={setSheetOpen}
         user={user}
-        onLogout={onLogout}
+        onLogout={handleLogout}
       />
     </>
   );

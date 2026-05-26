@@ -30,7 +30,11 @@ export function protect(
   const token = authHeader.split(" ")[1];
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as JwtPayload;
+    if (!env.JWT_SECRET) {
+      res.status(500).json({ success: false, message: "Server misconfigured." });
+      return;
+    }
+    const decoded = jwt.verify(token, env.JWT_SECRET) as JwtPayload;
     req.userId = decoded.userId;
     next();
   } catch {
