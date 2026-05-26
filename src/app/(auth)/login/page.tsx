@@ -20,6 +20,7 @@ import {
   SocialIconButton,
   TwitterIcon,
 } from "@/components/auth/auth-page-shell";
+import { api } from "@/lib/api";
 
 const loginSchema = z.object({
   email: z.string().email({ message: "Enter a valid email address" }),
@@ -79,15 +80,10 @@ export default function LoginPage() {
   const onSubmit = async (data: LoginForm) => {
     setLoading(true);
     try {
-      const res = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
+      const response = await api.post("/auth/login", data);
+      const json = response.data;
 
-      const json = await res.json();
-
-      if (res.ok && json.success && json.data?.accessToken) {
+      if (json.success && json.data?.accessToken) {
         const { setAuthToken, setAuthUser } = await import("@/lib/auth");
 
         setAuthToken(json.data.accessToken);
@@ -106,8 +102,14 @@ export default function LoginPage() {
       } else {
         toast.error(json.message || "Invalid credentials");
       }
-    } catch {
-      toast.error("Something went wrong. Please try again.");
+    } catch (error) {
+      const message =
+        error && typeof error === "object" && "response" in error
+          ? (error as { response?: { data?: { message?: string } } }).response?.data
+              ?.message
+          : undefined;
+
+      toast.error(message || "Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }

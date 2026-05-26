@@ -21,6 +21,7 @@ import {
   SocialIconButton,
   TwitterIcon,
 } from "@/components/auth/auth-page-shell";
+import { api } from "@/lib/api";
 
 const registerSchema = z
   .object({
@@ -84,14 +85,44 @@ export default function RegisterPage() {
     mode: "onTouched",
   });
 
-  async function onSubmit() {
+  async function onSubmit(data: RegisterForm) {
     setLoading(true);
     try {
-      await new Promise((res) => setTimeout(res, 1500));
-      toast.success("Account created successfully!");
-      router.push("/dashboard");
-    } catch {
-      toast.error("Registration failed. Please try again.");
+      const response = await api.post("/auth/register", {
+        name: data.name,
+        email: data.email,
+        password: data.password,
+      });
+
+      const json = response.data;
+
+      if (json.success && json.data?.accessToken) {
+        const { setAuthToken, setAuthUser } = await import("@/lib/auth");
+
+        setAuthToken(json.data.accessToken);
+
+        if (json.data.user) {
+          setAuthUser({
+            id: String(json.data.user.id),
+            name: json.data.user.name,
+            email: json.data.user.email,
+            role: json.data.user.role ?? "USER",
+          });
+        }
+
+        toast.success("Account created successfully!");
+        router.push("/dashboard");
+      } else {
+        toast.error(json.message || "Registration failed. Please try again.");
+      }
+    } catch (error) {
+      const message =
+        error && typeof error === "object" && "response" in error
+          ? (error as { response?: { data?: { message?: string } } }).response?.data
+              ?.message
+          : undefined;
+
+      toast.error(message || "Registration failed. Please try again.");
     } finally {
       setLoading(false);
     }
