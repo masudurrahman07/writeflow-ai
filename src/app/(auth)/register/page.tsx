@@ -1,34 +1,80 @@
 /* src/app/(auth)/register/page.tsx */
 "use client";
 
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { toast } from "sonner";
+import { z } from "zod";
+import { Eye, EyeOff } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
-import { toast } from "sonner";
-import Link from "next/link";
+import {
+  AuthPageShell,
+  GithubIcon,
+  LinkedinIcon,
+  SocialIconButton,
+  TwitterIcon,
+} from "@/components/auth/auth-page-shell";
 
-const registerSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  email: z.string().email({ message: "Enter a valid email address" }),
-  password: z.string().min(6, "Password must be at least 6 characters"),
-  confirmPassword: z.string().min(1, "Please confirm your password"),
-}).refine((data) => data.password === data.confirmPassword, {
-  path: ["confirmPassword"],
-  message: "Passwords don't match",
-});
+const registerSchema = z
+  .object({
+    name: z.string().min(1, "Name is required"),
+    email: z.string().email({ message: "Enter a valid email address" }),
+    password: z.string().min(6, "Password must be at least 6 characters"),
+    confirmPassword: z.string().min(1, "Please confirm your password"),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    path: ["confirmPassword"],
+    message: "Passwords don't match",
+  });
 
 type RegisterForm = z.infer<typeof registerSchema>;
 
-
+function FloatingField({
+  id,
+  label,
+  type = "text",
+  error,
+  ...props
+}: React.InputHTMLAttributes<HTMLInputElement> & {
+  id: string;
+  label: string;
+  error?: string;
+}) {
+  return (
+    <div className="space-y-1.5">
+      <div className="relative">
+        <Input
+          id={id}
+          type={type}
+          placeholder=" "
+          className="peer h-12 bg-background/80 pt-5 pb-2"
+          {...props}
+        />
+        <label
+          htmlFor={id}
+          className="pointer-events-none absolute left-3 top-2.5 text-sm text-muted-foreground transition-all peer-placeholder-shown:top-2.5 peer-placeholder-shown:text-sm peer-focus:-top-2 peer-focus:text-xs peer-focus:text-primary peer-[&:not(:placeholder-shown)]:-top-2 peer-[&:not(:placeholder-shown)]:text-xs"
+        >
+          {label}
+        </label>
+      </div>
+      {error ? <p className="text-xs text-destructive">{error}</p> : null}
+    </div>
+  );
+}
 
 export default function RegisterPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
   const {
     register,
     handleSubmit,
@@ -41,7 +87,6 @@ export default function RegisterPage() {
   async function onSubmit() {
     setLoading(true);
     try {
-      // TODO: replace with real registration API call
       await new Promise((res) => setTimeout(res, 1500));
       toast.success("Account created successfully!");
       router.push("/dashboard");
@@ -52,65 +97,128 @@ export default function RegisterPage() {
     }
   }
 
+  const handleGoogle = async () => {
+    setLoading(true);
+    await signIn("google", { callbackUrl: "/google-callback" });
+    setLoading(false);
+  };
+
   return (
-    <div className="container flex min-h-screen w-full flex-col items-center justify-center px-4 dark:bg-background">
-      <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
-        <div className="flex flex-col space-y-2 text-center">
-          <h1 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-white">
-            Create your account
-          </h1>
-          <p className="text-sm text-slate-600 dark:text-slate-400">
-            Fill in the details below to get started.
-          </p>
-        </div>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" autoComplete="off">
-          <div className="space-y-2">
-            <label htmlFor="name" className="block text-sm font-medium text-slate-700 dark:text-slate-200">
-              Name
-            </label>
-            <Input id="name" type="text" {...register("name")} disabled={loading} />
-            {errors.name && (
-              <p className="mt-1 text-xs text-red-500">{errors.name.message}</p>
-            )}
-          </div>
-          <div className="space-y-2">
-            <label htmlFor="email" className="block text-sm font-medium text-slate-700 dark:text-slate-200">
-              Email
-            </label>
-            <Input id="email" type="email" {...register("email")} disabled={loading} />
-            {errors.email && (
-              <p className="mt-1 text-xs text-red-500">{errors.email.message}</p>
-            )}
-          </div>
-          <div className="space-y-2">
-            <label htmlFor="password" className="block text-sm font-medium text-slate-700 dark:text-slate-200">
+    <AuthPageShell
+      badge="New Account"
+      title="Create your account"
+      subtitle="Set up your WriteFlow workspace and start creating polished, high-converting content in minutes."
+    >
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" autoComplete="off">
+        <FloatingField
+          id="name"
+          label="Full name"
+          {...register("name")}
+          disabled={loading}
+          error={errors.name?.message}
+        />
+
+        <FloatingField
+          id="email"
+          label="Email address"
+          type="email"
+          autoComplete="email"
+          {...register("email")}
+          disabled={loading}
+          error={errors.email?.message}
+        />
+
+        <div className="space-y-1.5">
+          <div className="relative">
+            <Input
+              id="password"
+              type={showPassword ? "text" : "password"}
+              placeholder=" "
+              className="peer h-12 bg-background/80 pt-5 pb-2 pr-11"
+              disabled={loading}
+              {...register("password")}
+            />
+            <label
+              htmlFor="password"
+              className="pointer-events-none absolute left-3 top-2.5 text-sm text-muted-foreground transition-all peer-placeholder-shown:top-2.5 peer-placeholder-shown:text-sm peer-focus:-top-2 peer-focus:text-xs peer-focus:text-primary peer-[&:not(:placeholder-shown)]:-top-2 peer-[&:not(:placeholder-shown)]:text-xs"
+            >
               Password
             </label>
-            <Input id="password" type="password" {...register("password")} disabled={loading} />
-            {errors.password && (
-              <p className="mt-1 text-xs text-red-500">{errors.password.message}</p>
-            )}
+            <button
+              type="button"
+              onClick={() => setShowPassword((current) => !current)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition hover:text-foreground"
+              aria-label={showPassword ? "Hide password" : "Show password"}
+            >
+              {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            </button>
           </div>
-          <div className="space-y-2">
-            <label htmlFor="confirmPassword" className="block text-sm font-medium text-slate-700 dark:text-slate-200">
-              Confirm Password
-            </label>
-            <Input id="confirmPassword" type="password" {...register("confirmPassword")} disabled={loading} />
-            {errors.confirmPassword && (
-              <p className="mt-1 text-xs text-red-500">{errors.confirmPassword.message}</p>
-            )}
-          </div>
-          <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? <Spinner className="w-4 h-4 mr-2" /> : null}
-            Sign Up
-          </Button>
-        </form>
-        <div className="flex justify-between items-center text-xs">
-          <Link href="/login" className="text-slate-500 hover:underline dark:text-slate-400">
-            Already have an account? Login
-          </Link>
+          {errors.password ? (
+            <p className="text-xs text-destructive">{errors.password.message}</p>
+          ) : null}
         </div>
+
+        <div className="space-y-1.5">
+          <div className="relative">
+            <Input
+              id="confirmPassword"
+              type={showConfirmPassword ? "text" : "password"}
+              placeholder=" "
+              className="peer h-12 bg-background/80 pt-5 pb-2 pr-11"
+              disabled={loading}
+              {...register("confirmPassword")}
+            />
+            <label
+              htmlFor="confirmPassword"
+              className="pointer-events-none absolute left-3 top-2.5 text-sm text-muted-foreground transition-all peer-placeholder-shown:top-2.5 peer-placeholder-shown:text-sm peer-focus:-top-2 peer-focus:text-xs peer-focus:text-primary peer-[&:not(:placeholder-shown)]:-top-2 peer-[&:not(:placeholder-shown)]:text-xs"
+            >
+              Confirm password
+            </label>
+            <button
+              type="button"
+              onClick={() => setShowConfirmPassword((current) => !current)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition hover:text-foreground"
+              aria-label={showConfirmPassword ? "Hide confirm password" : "Show confirm password"}
+            >
+              {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            </button>
+          </div>
+          {errors.confirmPassword ? (
+            <p className="text-xs text-destructive">{errors.confirmPassword.message}</p>
+          ) : null}
+        </div>
+
+        <Button type="submit" className="w-full h-11" disabled={loading}>
+          {loading ? <Spinner className="mr-2 h-4 w-4" /> : null}
+          Create account
+        </Button>
+      </form>
+
+      <div className="w-full space-y-4">
+        <Button
+          type="button"
+          variant="secondary"
+          className="w-full h-11"
+          onClick={handleGoogle}
+          disabled={loading}
+        >
+          {loading ? <Spinner className="mr-2 h-4 w-4" /> : null}
+          Continue with Google
+        </Button>
+
+        <div className="flex items-center justify-center gap-3 pt-1">
+          <SocialIconButton icon={GithubIcon} label="Github" />
+          <SocialIconButton icon={TwitterIcon} label="Twitter" />
+          <SocialIconButton icon={LinkedinIcon} label="Linkedin" />
+        </div>
+
+        <p className="text-center text-sm text-muted-foreground">
+          Already have an account?{" "}
+          <Link href="/login" className="font-semibold text-primary underline-offset-4 hover:underline">
+            Login
+          </Link>
+        </p>
       </div>
-    </div>
+    </AuthPageShell>
   );
 }
