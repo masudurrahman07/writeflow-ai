@@ -445,10 +445,9 @@ export function Navbar({ user: propUser, onLogout }: NavbarProps) {
       <header
         className={cn(
           "sticky top-0 z-50 w-full",
-          "border-b border-border/60",
-          "bg-background/95 backdrop-blur-md",
-          "transition-shadow duration-200",
-          scrolled && "shadow-sm"
+          "transition-all duration-300 ease-out",
+          "border-b border-border/30 bg-background/60 backdrop-blur-xl",
+          scrolled && "bg-background/75 shadow-[0_20px_60px_-40px_rgba(15,23,42,0.35)]"
         )}
       >
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">

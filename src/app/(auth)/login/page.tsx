@@ -46,12 +46,12 @@ function FloatingInput({
           id={id}
           type={type}
           placeholder=" "
-          className="peer h-12 bg-background/80 pt-5 pb-2"
+          className="peer h-14 rounded-[1.15rem] border border-white/25 bg-white/70 px-4 pb-2 pt-6 text-sm text-foreground shadow-[0_16px_50px_-28px_rgba(59,130,246,0.45)] backdrop-blur-xl transition-all duration-200 placeholder:text-transparent focus-visible:outline-none focus-visible:border-primary/60 focus-visible:ring-0 dark:border-white/10 dark:bg-slate-950/45"
           {...props}
         />
         <label
           htmlFor={id}
-          className="pointer-events-none absolute left-3 top-2.5 text-sm text-muted-foreground transition-all peer-placeholder-shown:top-2.5 peer-placeholder-shown:text-sm peer-focus:-top-2 peer-focus:text-xs peer-focus:text-primary peer-[&:not(:placeholder-shown)]:-top-2 peer-[&:not(:placeholder-shown)]:text-xs"
+          className="pointer-events-none absolute left-4 top-3.5 text-sm text-muted-foreground transition-all peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-sm peer-focus:-top-1 peer-focus:text-[11px] peer-focus:font-medium peer-focus:text-primary peer-[&:not(:placeholder-shown)]:-top-1 peer-[&:not(:placeholder-shown)]:text-[11px]"
         >
           {label}
         </label>
@@ -131,7 +131,7 @@ export default function LoginPage() {
       title="Login to WriteFlow AI"
       subtitle="Sign in to continue your writing journey with a secure, fast, and beautifully designed workspace."
     >
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
         <FloatingInput
           id="email"
           label="Email address"
@@ -148,20 +148,20 @@ export default function LoginPage() {
               id="password"
               type={showPassword ? "text" : "password"}
               placeholder=" "
-              className="peer h-12 bg-background/80 pt-5 pb-2 pr-11"
+              className="peer h-14 rounded-[1.15rem] border border-white/25 bg-white/70 px-4 pb-2 pt-6 pr-12 text-sm text-foreground shadow-[0_16px_50px_-28px_rgba(59,130,246,0.45)] backdrop-blur-xl transition-all duration-200 placeholder:text-transparent focus-visible:outline-none focus-visible:border-primary/60 focus-visible:ring-0 dark:border-white/10 dark:bg-slate-950/45"
               disabled={loading}
               {...register("password")}
             />
             <label
               htmlFor="password"
-              className="pointer-events-none absolute left-3 top-2.5 text-sm text-muted-foreground transition-all peer-placeholder-shown:top-2.5 peer-placeholder-shown:text-sm peer-focus:-top-2 peer-focus:text-xs peer-focus:text-primary peer-[&:not(:placeholder-shown)]:-top-2 peer-[&:not(:placeholder-shown)]:-translate-y-0 peer-[&:not(:placeholder-shown)]:text-xs"
+              className="pointer-events-none absolute left-4 top-3.5 text-sm text-muted-foreground transition-all peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-sm peer-focus:-top-1 peer-focus:text-[11px] peer-focus:font-medium peer-focus:text-primary peer-[&:not(:placeholder-shown)]:-top-1 peer-[&:not(:placeholder-shown)]:text-[11px]"
             >
               Password
             </label>
             <button
               type="button"
               onClick={() => setShowPassword((current) => !current)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition hover:text-foreground"
+              className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full border border-white/25 bg-white/70 p-2 text-muted-foreground transition-all duration-200 hover:border-primary/60 hover:text-foreground dark:border-white/10 dark:bg-slate-950/45"
               aria-label={showPassword ? "Hide password" : "Show password"}
             >
               {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -172,18 +172,21 @@ export default function LoginPage() {
           ) : null}
         </div>
 
-        <Button type="submit" className="w-full h-11" disabled={loading}>
+        <Button
+          type="submit"
+          className="h-12 w-full rounded-[1.1rem] bg-gradient-to-r from-sky-500 via-blue-500 to-indigo-500 text-sm font-semibold text-white shadow-[0_20px_60px_-22px_rgba(59,130,246,0.8)] transition-transform duration-200 hover:scale-[1.01]"
+          disabled={loading}
+        >
           {loading ? <Spinner className="mr-2 h-4 w-4" /> : null}
           Sign In
         </Button>
       </form>
 
-      <div className="w-full space-y-4">
+      <div className="w-full space-y-4 pt-2">
         <div className="grid gap-3 sm:grid-cols-2">
           <Button
             type="button"
-            variant="outline"
-            className="h-11 justify-center"
+            className="h-12 justify-center rounded-[1.1rem] border border-white/25 bg-white/65 text-foreground shadow-[0_16px_40px_-28px_rgba(59,130,246,0.45)] backdrop-blur-xl transition-transform duration-200 hover:scale-[1.01] dark:border-white/10 dark:bg-slate-950/45"
             onClick={() => demoLogin("user@writeflow.com", "123456")}
             disabled={loading}
           >
@@ -191,8 +194,7 @@ export default function LoginPage() {
           </Button>
           <Button
             type="button"
-            variant="outline"
-            className="h-11 justify-center"
+            className="h-12 justify-center rounded-[1.1rem] border border-white/25 bg-white/65 text-foreground shadow-[0_16px_40px_-28px_rgba(59,130,246,0.45)] backdrop-blur-xl transition-transform duration-200 hover:scale-[1.01] dark:border-white/10 dark:bg-slate-950/45"
             onClick={() => demoLogin("admin@writeflow.com", "123456")}
             disabled={loading}
           >
@@ -202,8 +204,7 @@ export default function LoginPage() {
 
         <Button
           type="button"
-          variant="secondary"
-          className="w-full h-11"
+          className="h-12 w-full rounded-[1.1rem] border border-white/25 bg-white/65 text-foreground shadow-[0_16px_40px_-28px_rgba(59,130,246,0.45)] backdrop-blur-xl transition-transform duration-200 hover:scale-[1.01] dark:border-white/10 dark:bg-slate-950/45"
           onClick={handleGoogle}
           disabled={loading}
         >

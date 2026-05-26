@@ -54,12 +54,12 @@ function FloatingField({
           id={id}
           type={type}
           placeholder=" "
-          className="peer h-12 bg-background/80 pt-5 pb-2"
+          className="peer h-14 rounded-[1.15rem] border border-white/25 bg-white/70 px-4 pb-2 pt-6 text-sm text-foreground shadow-[0_16px_50px_-28px_rgba(59,130,246,0.45)] backdrop-blur-xl transition-all duration-200 placeholder:text-transparent focus-visible:outline-none focus-visible:border-primary/60 focus-visible:ring-0 dark:border-white/10 dark:bg-slate-950/45"
           {...props}
         />
         <label
           htmlFor={id}
-          className="pointer-events-none absolute left-3 top-2.5 text-sm text-muted-foreground transition-all peer-placeholder-shown:top-2.5 peer-placeholder-shown:text-sm peer-focus:-top-2 peer-focus:text-xs peer-focus:text-primary peer-[&:not(:placeholder-shown)]:-top-2 peer-[&:not(:placeholder-shown)]:text-xs"
+          className="pointer-events-none absolute left-4 top-3.5 text-sm text-muted-foreground transition-all peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-sm peer-focus:-top-1 peer-focus:text-[11px] peer-focus:font-medium peer-focus:text-primary peer-[&:not(:placeholder-shown)]:-top-1 peer-[&:not(:placeholder-shown)]:text-[11px]"
         >
           {label}
         </label>
@@ -109,7 +109,7 @@ export default function RegisterPage() {
       title="Create your account"
       subtitle="Set up your WriteFlow workspace and start creating polished, high-converting content in minutes."
     >
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" autoComplete="off">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-5" autoComplete="off">
         <FloatingField
           id="name"
           label="Full name"
@@ -134,20 +134,20 @@ export default function RegisterPage() {
               id="password"
               type={showPassword ? "text" : "password"}
               placeholder=" "
-              className="peer h-12 bg-background/80 pt-5 pb-2 pr-11"
+              className="peer h-14 rounded-[1.15rem] border border-white/25 bg-white/70 px-4 pb-2 pt-6 pr-12 text-sm text-foreground shadow-[0_16px_50px_-28px_rgba(59,130,246,0.45)] backdrop-blur-xl transition-all duration-200 placeholder:text-transparent focus-visible:outline-none focus-visible:border-primary/60 focus-visible:ring-0 dark:border-white/10 dark:bg-slate-950/45"
               disabled={loading}
               {...register("password")}
             />
             <label
               htmlFor="password"
-              className="pointer-events-none absolute left-3 top-2.5 text-sm text-muted-foreground transition-all peer-placeholder-shown:top-2.5 peer-placeholder-shown:text-sm peer-focus:-top-2 peer-focus:text-xs peer-focus:text-primary peer-[&:not(:placeholder-shown)]:-top-2 peer-[&:not(:placeholder-shown)]:text-xs"
+              className="pointer-events-none absolute left-4 top-3.5 text-sm text-muted-foreground transition-all peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-sm peer-focus:-top-1 peer-focus:text-[11px] peer-focus:font-medium peer-focus:text-primary peer-[&:not(:placeholder-shown)]:-top-1 peer-[&:not(:placeholder-shown)]:text-[11px]"
             >
               Password
             </label>
             <button
               type="button"
               onClick={() => setShowPassword((current) => !current)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition hover:text-foreground"
+              className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full border border-white/25 bg-white/70 p-2 text-muted-foreground transition-all duration-200 hover:border-primary/60 hover:text-foreground dark:border-white/10 dark:bg-slate-950/45"
               aria-label={showPassword ? "Hide password" : "Show password"}
             >
               {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -164,20 +164,20 @@ export default function RegisterPage() {
               id="confirmPassword"
               type={showConfirmPassword ? "text" : "password"}
               placeholder=" "
-              className="peer h-12 bg-background/80 pt-5 pb-2 pr-11"
+              className="peer h-14 rounded-[1.15rem] border border-white/25 bg-white/70 px-4 pb-2 pt-6 pr-12 text-sm text-foreground shadow-[0_16px_50px_-28px_rgba(59,130,246,0.45)] backdrop-blur-xl transition-all duration-200 placeholder:text-transparent focus-visible:outline-none focus-visible:border-primary/60 focus-visible:ring-0 dark:border-white/10 dark:bg-slate-950/45"
               disabled={loading}
               {...register("confirmPassword")}
             />
             <label
               htmlFor="confirmPassword"
-              className="pointer-events-none absolute left-3 top-2.5 text-sm text-muted-foreground transition-all peer-placeholder-shown:top-2.5 peer-placeholder-shown:text-sm peer-focus:-top-2 peer-focus:text-xs peer-focus:text-primary peer-[&:not(:placeholder-shown)]:-top-2 peer-[&:not(:placeholder-shown)]:text-xs"
+              className="pointer-events-none absolute left-4 top-3.5 text-sm text-muted-foreground transition-all peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-sm peer-focus:-top-1 peer-focus:text-[11px] peer-focus:font-medium peer-focus:text-primary peer-[&:not(:placeholder-shown)]:-top-1 peer-[&:not(:placeholder-shown)]:text-[11px]"
             >
               Confirm password
             </label>
             <button
               type="button"
               onClick={() => setShowConfirmPassword((current) => !current)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition hover:text-foreground"
+              className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full border border-white/25 bg-white/70 p-2 text-muted-foreground transition-all duration-200 hover:border-primary/60 hover:text-foreground dark:border-white/10 dark:bg-slate-950/45"
               aria-label={showConfirmPassword ? "Hide confirm password" : "Show confirm password"}
             >
               {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -188,17 +188,20 @@ export default function RegisterPage() {
           ) : null}
         </div>
 
-        <Button type="submit" className="w-full h-11" disabled={loading}>
+        <Button
+          type="submit"
+          className="h-12 w-full rounded-[1.1rem] bg-gradient-to-r from-sky-500 via-blue-500 to-indigo-500 text-sm font-semibold text-white shadow-[0_20px_60px_-22px_rgba(59,130,246,0.8)] transition-transform duration-200 hover:scale-[1.01]"
+          disabled={loading}
+        >
           {loading ? <Spinner className="mr-2 h-4 w-4" /> : null}
           Create account
         </Button>
       </form>
 
-      <div className="w-full space-y-4">
+      <div className="w-full space-y-4 pt-2">
         <Button
           type="button"
-          variant="secondary"
-          className="w-full h-11"
+          className="h-12 w-full rounded-[1.1rem] border border-white/25 bg-white/65 text-foreground shadow-[0_16px_40px_-28px_rgba(59,130,246,0.45)] backdrop-blur-xl transition-transform duration-200 hover:scale-[1.01] dark:border-white/10 dark:bg-slate-950/45"
           onClick={handleGoogle}
           disabled={loading}
         >
